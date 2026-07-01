@@ -1,0 +1,47 @@
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      
+      <div *ngIf="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="text-muted mt-2">Conectando con el backend...</p>
+      </div>
+
+      <div *ngIf="!loading && errorMessage" class="alert alert-danger shadow-sm d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>
+          <strong>¡Ups!</strong> {{ errorMessage }}
+          <button class="btn btn-sm btn-outline-danger d-block mt-2" (click)="obtenerSaludo()">Reintentar</button>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && apiData" class="card shadow border-0 rounded-3">
+        <div class="card-header bg-primary text-white py-3 text-center">
+          <h4 class="mb-0 fw-bold">Respuesta del Backend</h4>
+        </div>
+        <div class="card-body p-4 text-center">
+          <div class="mb-3 text-success fs-1">
+            Ok
+          </div>
+          
+          <h3 class="card-title text-dark mb-4">{{ apiData.message }}</h3>
+          
+          <hr class="text-muted">
+          
+          <p class="card-text text-muted small mb-0">
+            <strong>Fecha del servidor:</strong> <br>
+            {{ apiData.timestamp | date:'medium' }}
+          </p>
+        </div>
+        <div class="card-footer bg-light text-center py-3">
+          <button class="btn btn-outline-primary btn-sm" (click)="obtenerSaludo()">
+            Actualizar datos
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
