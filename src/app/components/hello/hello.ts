@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HelloService, HelloResponse } from '../../services/hello.service';
 
@@ -15,7 +15,10 @@ export class Hello implements OnInit {
   errorMessage: string | null = null;
   loading: boolean = true;
 
-  constructor(private helloService: HelloService) { }
+  constructor(
+    private helloService: HelloService,
+    private cd: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.obtenerSaludo();
@@ -29,11 +32,13 @@ export class Hello implements OnInit {
       next: (response) => {
         this.apiData = response;
         this.loading = false;
+        this.cd.detectChanges();
       },
       error: (err) => {
         console.error(err);
         this.errorMessage = 'No se pudo conectar con el servidor backend';
         this.loading = false;
+        this.cd.detectChanges();
       }
     });
   }
