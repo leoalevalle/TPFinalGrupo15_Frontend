@@ -1,0 +1,97 @@
+<div class="modal fade" id="loginModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="title">TaxiFem</h4>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Tabs -->
+        <div class="tabs mb-4">
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'login'"
+            (click)="activeTab='login'">
+
+            Iniciar Sesión
+          </button>
+
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'register'"
+            (click)="activeTab='register'">
+
+            Registrarse
+          </button>
+        </div>
+
+        <!-- LOGIN -->
+        <form *ngIf="activeTab === 'login'"
+              [formGroup]="loginForm"
+              (ngSubmit)="iniciarSesion()">
+
+          <input
+            class="form-control mb-3"
+            type="text"
+            placeholder="Email o usuario"
+            formControlName="login">
+
+          <input
+            class="form-control mb-3"
+            type="password"
+            placeholder="Contraseña"
+            formControlName="contrasenia">
+
+          <button class="btn btn-custom w-100">
+            Ingresar
+          </button>
+        </form>
+
+        <!-- REGISTER -->
+        <form *ngIf="activeTab === 'register'"
+              [formGroup]="registerForm"
+              (ngSubmit)="registrarse()">
+
+          <input class="form-control mb-2"
+                 placeholder="Nombre"
+                 formControlName="nombre">
+
+          <input class="form-control mb-2"
+                 placeholder="Teléfono"
+                 formControlName="telefono">
+
+          <input class="form-control mb-2"
+                 placeholder="Email"
+                 formControlName="email">
+
+          <input class="form-control mb-2"
+                 placeholder="Nombre de usuario"
+                 formControlName="nomUsuario">
+
+          <input class="form-control mb-2"
+                 type="password"
+                 placeholder="Contraseña"
+                 formControlName="contrasenia">
+
+          <select class="form-control mb-3"
+                  formControlName="sexo">
+            <option value="">Sexo</option>
+            <option value="F">Femenino</option>
+            <option value="M">Masculino</option>
+            <option value="Otro">Otro</option>
+          </select>
+
+          <button class="btn btn-custom w-100">
+            Registrarme
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>

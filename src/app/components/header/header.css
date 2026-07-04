@@ -1,0 +1,56 @@
+.logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ff5fa2;
+}
+
+.nav-link {
+  color: #1f1f1f;
+  font-weight: 500;
+  transition: 0.3s;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link:hover {
+  color: #ff5fa2;
+  border-bottom: 2px solid #ff5fa2;
+}
+
+.btn-custom {
+  background-color: #ff5fa2;
+  color: white;
+  border-radius: 10px;
+  padding: 8px 18px;
+  border: none;
+  transition: 0.3s;
+}
+
+.btn-custom:hover {
+  background-color: #e94d90;
+  color: white;
+}
+
+.btn-outline-custom {
+  border: 1px solid #ff5fa2;
+  color: #ff5fa2;
+  border-radius: 10px;
+  padding: 8px 18px;
+  background-color: white;
+  transition: 0.3s;
+}
+
+.btn-outline-custom:hover {
+  background-color: #ff5fa2;
+  color: white;
+}
+
+.navbar-toggler {
+  border: none;
+  font-size: 1.8rem;
+}
