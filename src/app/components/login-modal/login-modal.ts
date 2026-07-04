@@ -18,6 +18,7 @@ export class LoginModal {
   activeTab = 'login';
   loginForm!: FormGroup;
   registerForm!: FormGroup;
+  conductoraForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
@@ -36,6 +37,23 @@ export class LoginModal {
       nomUsuario: ['', Validators.required],
       contrasenia: ['', [Validators.required, Validators.minLength(6)]],
       sexo: ['', Validators.required]
+    });
+
+    this.conductoraForm = this.fb.group({
+        // Datos personales
+        nombre: ['', Validators.required],
+        telefono: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        nomUsuario: ['', Validators.required],
+        contrasenia: ['', [Validators.required, Validators.minLength(6)]],
+        sexo: ['', Validators.required],
+
+        // Datos del vehículo
+        marca: ['', Validators.required],
+        modelo: ['', Validators.required],
+        color: ['', Validators.required],
+        patente: ['', Validators.required]
+
     });
   }
 
@@ -93,6 +111,36 @@ export class LoginModal {
       }
     });
   }
+
+  registrarConductora() {
+
+    if (this.conductoraForm.invalid) return;
+    this.authService
+        .registerConductora(this.conductoraForm.value)
+        .subscribe({
+          next: () => {
+            Swal.fire({
+              icon:'success',
+              title:'Solicitud enviada',
+              text:'Tu solicitud será revisada por una administradora.'
+            });
+            this.activeTab='login';
+            this.conductoraForm.reset();
+          },
+
+          error:()=>{
+            Swal.fire({
+              icon:'info',
+              title:'Backend pendiente',
+              text:'La interfaz ya está lista. Falta implementar el endpoint de registro de conductoras.'
+            });
+
+          }
+
+     });
+
+  }
+
 
   redirigirPorRol(rol: number) {
     switch (rol) {

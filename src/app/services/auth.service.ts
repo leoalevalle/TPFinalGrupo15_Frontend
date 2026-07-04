@@ -18,6 +18,10 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/register`, userData);
   }
 
+  registerConductora(data: any) {
+    return this.http.post(`${this.apiUrl}/conductoras/register`, data);
+  }
+
   guardarSesion(response: any): void {
     localStorage.setItem('token', response.token);
     localStorage.setItem('user', JSON.stringify(response.usuario));

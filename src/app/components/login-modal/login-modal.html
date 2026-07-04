@@ -26,6 +26,12 @@
 
             Registrarse
           </button>
+
+          <button
+              class="tab-btn"
+              [class.active]="activeTab === 'conductora'"
+              (click)="activeTab='conductora'">Registrarse como Conductora
+          </button>
         </div>
 
         <!-- LOGIN -->
@@ -89,6 +95,86 @@
           </button>
 
         </form>
+
+        <!-- REGISTRARSE COMO CONDUCTORA -->
+        
+        <form *ngIf="activeTab==='conductora'"
+            [formGroup]="conductoraForm"
+            (ngSubmit)="registrarConductora()">
+
+            <h6 class="mb-3">
+            Datos personales
+            </h6>
+
+            <input
+            class="form-control mb-2"
+            placeholder="Nombre"
+            formControlName="nombre">
+
+            <input
+            class="form-control mb-2"
+            placeholder="Teléfono"
+            formControlName="telefono">
+
+            <input
+            class="form-control mb-2"
+            placeholder="Correo electrónico"
+            formControlName="email">
+
+            <input
+            class="form-control mb-2"
+            placeholder="Nombre de usuario"
+            formControlName="nomUsuario">
+
+            <input
+            class="form-control mb-2"
+            type="password"
+            placeholder="Contraseña"
+            formControlName="contrasenia">
+
+            <select
+            class="form-control mb-3"
+            formControlName="sexo">
+
+            <option value="">Sexo</option>
+            <option value="F">Femenino</option>
+            <option value="M">Masculino</option>
+            <option value="Otro">Otro</option>
+
+            </select>
+
+            <hr>
+
+            <h6 class="mb-3">
+            Datos del vehículo
+            </h6>
+
+            <input
+            class="form-control mb-2"
+            placeholder="Marca"
+            formControlName="marca">
+
+            <input
+            class="form-control mb-2"
+            placeholder="Modelo"
+            formControlName="modelo">
+
+            <input
+            class="form-control mb-2"
+            placeholder="Color"
+            formControlName="color">
+
+            <input
+            class="form-control mb-3"
+            placeholder="Patente"
+            formControlName="patente">
+
+            <button class="btn btn-custom w-100">
+            Enviar solicitud
+            </button>
+
+        </form>
+
 
       </div>
 
