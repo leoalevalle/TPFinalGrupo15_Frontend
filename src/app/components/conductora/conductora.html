@@ -1,0 +1,27 @@
+<div class="container py-5">
+
+    <h2 class="mb-4 text-center">
+        Panel de Conductora
+    </h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h3>Hola {{conductora?.nombre}}</h3>
+            <p>
+                {{conductora?.email}}
+            </p>
+            <p>
+                {{conductora?.telefono}}
+            </p>
+        </div>
+
+    </div>
+
+    <app-jornada-card></app-jornada-card>
+
+    <app-vehiculo-card></app-vehiculo-card>
+
+
+    <app-cambio-vehiculo-modal></app-cambio-vehiculo-modal>
+
+</div>

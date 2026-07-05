@@ -1,0 +1,54 @@
+ <div class="card shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <h3 class="mb-4">
+            🚗 Mi Vehículo
+        </h3>
+        <hr>
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <label class="text-muted">
+                    Marca
+                </label>
+                <h5>{{vehiculo?.marca}}</h5>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="text-muted">
+                    Modelo
+                </label>
+                <h5>{{vehiculo?.modelo}}</h5>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="text-muted">
+                    Color
+                </label>
+                <h5>{{vehiculo?.color}}</h5>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="text-muted">
+                    Patente
+                </label>
+                <h5>{{vehiculo?.patente}}</h5>
+            </div>
+        </div>
+        <hr>
+
+        <p class="mb-0">
+            Estado:
+            <span
+                class="badge ms-2"
+                [ngClass]="vehiculo?.activo ? 'bg-success' : 'bg-danger'">
+                {{ vehiculo?.activo ? 'Activo' : 'Inactivo' }}
+
+            </span>
+
+        </p>
+
+    </div>
+
+</div>

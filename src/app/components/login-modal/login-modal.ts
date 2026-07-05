@@ -26,7 +26,7 @@ export class LoginModal {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      login: ['', Validators.required],
+      nomUsuario: ['', Validators.required],
       contrasenia: ['', Validators.required]
     });
 
@@ -73,7 +73,7 @@ export class LoginModal {
           showConfirmButton: false
         });
 
-        this.redirigirPorRol(res.usuario.rol);
+        this.redirigirPorRol(res.user.rol);
       },
       error: () => {
         Swal.fire({

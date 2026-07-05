@@ -1,0 +1,48 @@
+<div class="card shadow-sm mb-4">
+
+    <div class="card-body">
+        <h4>Mi Jornada</h4>
+        <hr>
+       <p>
+            Estado:
+
+            <span
+            class="badge"
+            [class.bg-success]="enJornada"
+            [class.bg-danger]="!enJornada">
+
+            {{ enJornada ? 'Disponible' : 'No disponible' }}
+
+            </span>
+
+        </p>
+        <p>
+            Zona actual:
+            {{ zonaActual }}
+        </p>
+
+        <div class="d-flex gap-3">
+
+            <button
+            *ngIf="!enJornada"
+            class="btn btn-success"
+            (click)="iniciarJornada()">
+
+            Iniciar Jornada
+
+            </button>
+
+            <button
+            *ngIf="enJornada"
+            class="btn btn-danger"
+            (click)="finalizarJornada()">
+
+            Finalizar Jornada
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

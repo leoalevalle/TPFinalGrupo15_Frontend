@@ -1,0 +1,36 @@
+<div class="card shadow-sm">
+
+    <div class="card-body">
+        <h4>Solicitar cambio de vehículo</h4>
+        <hr>
+        <label class="form-label">
+            Seleccione un vehículo
+        </label>
+
+        <select
+            class="form-select"
+            [(ngModel)]="idNuevoVehiculo">
+
+            <option value="0">
+                -- Seleccione --
+            </option>
+
+            <option
+                *ngFor="let vehiculo of vehiculos"
+                [value]="vehiculo.idVehiculo">
+                {{vehiculo.marca}}
+                {{vehiculo.modelo}}
+                -
+                {{vehiculo.patente}}
+            </option>
+        </select>
+        <br>
+        <button
+            class="btn btn-primary"
+            (click)="solicitarCambio()"
+            [disabled]="idNuevoVehiculo==0">
+            Enviar Solicitud
+        </button>
+    </div>
+
+</div>

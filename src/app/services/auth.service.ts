@@ -11,11 +11,11 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+    return this.http.post(`${this.apiUrl}/auth/login`, credentials);
   }
 
   register(userData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, userData);
+    return this.http.post(`${this.apiUrl}/auth/register`, userData);
   }
 
   registerConductora(data: any) {
@@ -24,7 +24,7 @@ export class AuthService {
 
   guardarSesion(response: any): void {
     localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.usuario));
+    localStorage.setItem('user', JSON.stringify(response.user));
   }
 
   logout(): void {
