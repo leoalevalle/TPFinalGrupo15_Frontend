@@ -71,9 +71,9 @@ export class LoginModal {
           title: 'Inicio de sesión exitoso',
           timer: 1500,
           showConfirmButton: false
+        }).then(() => {
+          this.redirigirPorRol(res.user.rol);
         });
-
-        this.redirigirPorRol(res.user.rol);
       },
       error: () => {
         Swal.fire({
