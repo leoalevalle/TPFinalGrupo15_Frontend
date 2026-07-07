@@ -1,4 +1,4 @@
-<div class="container py-5">
+<div class="container py-5" *ngIf="conductora">
 
     <h2 class="mb-4 text-center">
         Panel de Conductora
@@ -6,22 +6,20 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <h3>Hola {{conductora?.nombre}}</h3>
-            <p>
-                {{conductora?.email}}
-            </p>
-            <p>
-                {{conductora?.telefono}}
-            </p>
+            <h3>Hola {{conductora.nombre}}</h3>
+            <p>{{conductora.email}}</p>
+            <p>{{conductora.telefono}}</p>
         </div>
-
     </div>
 
-    <app-jornada-card></app-jornada-card>
+    <app-jornada-card [conductoraInfo]="conductora"></app-jornada-card>
 
-    <app-vehiculo-card></app-vehiculo-card>
+    <app-vehiculo-card [conductoraInfo]="conductora"></app-vehiculo-card>
 
+    <app-cambio-vehiculo-modal [conductoraInfo]="conductora"></app-cambio-vehiculo-modal>
 
-    <app-cambio-vehiculo-modal></app-cambio-vehiculo-modal>
+</div>
 
+<div *ngIf="!conductora" class="text-center py-5">
+    <p>Cargando datos del panel...</p>
 </div>

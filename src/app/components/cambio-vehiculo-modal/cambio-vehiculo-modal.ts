@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -17,6 +17,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class CambioVehiculoModal implements OnInit {
 
+  @Input() conductoraInfo: any;
   usuario: any;
   vehiculos: any[] = [];
   idNuevoVehiculo: number = 0;
@@ -24,7 +25,8 @@ export class CambioVehiculoModal implements OnInit {
 
   constructor(
     private conductoraService: ConductoraService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ){}
 
   ngOnInit(): void {
@@ -39,6 +41,7 @@ export class CambioVehiculoModal implements OnInit {
       .subscribe({
         next: (data:any) => {
           this.vehiculos = data;
+          this.cdr.detectChanges();
         },
 
         error: err => {
@@ -64,6 +67,7 @@ export class CambioVehiculoModal implements OnInit {
         next: (respuesta:any) => {
           this.mensaje = respuesta.message;
           alert(this.mensaje);
+          this.cdr.detectChanges();
         },
 
         error: err => {

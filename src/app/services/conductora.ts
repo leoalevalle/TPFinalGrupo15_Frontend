@@ -33,7 +33,7 @@ export class ConductoraService {
 
     obtenerVehiculo(id: number) {
       return this.http.get<any>(
-         'http://localhost:3000/api/admin/vehiculos/' + id
+         `http://localhost:3000/api/admin/vehiculos/${id}`
       );
     }
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { JornadaCard } from '../jornada-card/jornada-card';
 import { VehiculoCard } from '../vehiculo-card/vehiculo-card';
@@ -17,7 +17,11 @@ export class Conductora {
 
   conductora:any;
 
-  constructor(private authService: AuthService, private conductoraService: ConductoraService) {}
+  constructor(
+    private authService: AuthService, 
+    private conductoraService: ConductoraService, 
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(){
 
@@ -28,6 +32,7 @@ export class Conductora {
         .subscribe(res=>{
 
               this.conductora=res;
+              this.cdr.detectChanges();
 
         });
 

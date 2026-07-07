@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { ConductoraService } from '../../services/conductora';
@@ -11,20 +11,16 @@ import { ConductoraService } from '../../services/conductora';
   templateUrl: './vehiculo-card.html',
   styleUrl: './vehiculo-card.css',
 })
-export class VehiculoCard {
+export class VehiculoCard implements OnInit {
+  @Input() conductoraInfo: any;
   vehiculo: any;
 
-  constructor(
-    private authService: AuthService,
-    private conductoraService: ConductoraService
-  ) {}
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    const usuario = this.authService.getUser();
-    this.conductoraService
-      .obtenerVehiculo(usuario.idUsuario)
-      .subscribe((res: any) => {
-        this.vehiculo = res;
-      });
+    if (this.conductoraInfo && this.conductoraInfo.vehiculoAsignado) {
+      this.vehiculo = this.conductoraInfo.vehiculoAsignado;
+      this.cdr.detectChanges();
+    }
   }
 }
