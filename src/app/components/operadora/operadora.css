@@ -1,0 +1,231 @@
+:host {
+  --taxifem-pink: #ff4f8b;
+  --taxifem-pink-dark: #e63e77;
+  --taxifem-pink-light: #ffe3ee;
+}
+
+.operadora-wrapper {
+  min-height: 70vh;
+}
+
+.operadora-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--taxifem-pink), var(--taxifem-pink-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.6rem;
+  box-shadow: 0 6px 16px rgba(230, 62, 119, 0.35);
+}
+
+.operadora-title {
+  font-weight: 700;
+  color: #3a3a3a;
+  margin-bottom: 0.25rem;
+}
+
+.operadora-subtitle {
+  color: #8a8a8a;
+}
+
+.stat-card {
+  background: var(--taxifem-pink-light);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+}
+
+.stat-card i {
+  font-size: 1.8rem;
+  color: var(--taxifem-pink-dark);
+}
+
+.stat-card small {
+  color: #777;
+  display: block;
+}
+
+.stat-card h4 {
+  margin: 0;
+  font-weight: 700;
+  color: #333;
+}
+
+.operadora-tabs .nav-link {
+  border-radius: 20px;
+  padding: 0.5rem 1.1rem;
+  font-weight: 600;
+  color: var(--taxifem-pink-dark);
+  background: var(--taxifem-pink-light);
+  border: none;
+  cursor: pointer;
+}
+
+.operadora-tabs .nav-link.active {
+  background: linear-gradient(135deg, var(--taxifem-pink), var(--taxifem-pink-dark));
+  color: #fff;
+}
+
+.tab-badge {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--taxifem-pink-dark);
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+}
+
+.operadora-tabs .nav-link.active .tab-badge {
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.operadora-card {
+  border: none;
+  border-radius: 18px;
+}
+
+.text-pink {
+  color: var(--taxifem-pink);
+}
+
+.empty-state {
+  text-align: center;
+  color: #999;
+  padding: 2.5rem 1rem;
+}
+
+.empty-state i {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--taxifem-pink-light);
+}
+
+.empty-state-mini {
+  text-align: center;
+  color: #999;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.solicitud-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.ruta-info {
+  flex: 1;
+  min-width: 220px;
+}
+
+.ruta-linea {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.ruta-linea i {
+  font-size: 0.9rem;
+}
+
+.ruta-conector {
+  width: 2px;
+  height: 12px;
+  background: var(--taxifem-pink-light);
+  margin-left: 7px;
+}
+
+.ruta-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  color: #888;
+}
+
+.conductoras-panel {
+  background: var(--taxifem-pink-light);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.conductora-mini-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #eee;
+  height: 100%;
+}
+
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--taxifem-pink), var(--taxifem-pink-dark));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.propuesta-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.patente-icon {
+  background: var(--taxifem-pink-light);
+  color: var(--taxifem-pink-dark);
+  border: none;
+}
+
+.viaje-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.6rem;
+}
+
+.btn-pink {
+  background: linear-gradient(135deg, var(--taxifem-pink), var(--taxifem-pink-dark));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-pink:hover:not(:disabled) {
+  opacity: 0.9;
+  color: #fff;
+}
+
+.btn-outline-pink {
+  background: transparent;
+  border: 2px solid var(--taxifem-pink);
+  color: var(--taxifem-pink-dark);
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-outline-pink:hover {
+  background: var(--taxifem-pink);
+  color: #fff;
+}

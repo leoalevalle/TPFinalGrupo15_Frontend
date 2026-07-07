@@ -1,0 +1,261 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
+
+import { AuthService } from '../../services/auth.service';
+import { OperadoraService } from '../../services/operadora.service';
+import { Solicitud } from '../../models/solicitud';
+import { Viaje } from '../../models/viaje';
+import { Usuario } from '../../models/usuario';
+
+const STORAGE_PROPUESTAS = 'operadora_propuestas';
+const STORAGE_VIAJES = 'operadora_viajes';
+
+type TabOperadora = 'pendientes' | 'propuestas' | 'viajes';
+
+interface PropuestaEnCurso {
+  solicitud: Solicitud;
+  conductora: Usuario;
+  patente: string;
+}
+
+@Component({
+  selector: 'app-operadora',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './operadora.html',
+  styleUrl: './operadora.css',
+})
+export class Operadora implements OnInit {
+  usuario!: Usuario;
+  tabActiva: TabOperadora = 'pendientes';
+
+  // ---- Pendientes ----
+  solicitudesPendientes: Solicitud[] = [];
+  cargandoPendientes = false;
+
+  // ---- Búsqueda de conductora para una solicitud puntual ----
+  solicitudExpandidaId: number | null = null;
+  conductorasEncontradas: Usuario[] = [];
+  buscandoConductoras = false;
+
+  // ---- Propuestas enviadas, esperando aceptación de la conductora ----
+  propuestasEnCurso: PropuestaEnCurso[] = [];
+
+  // ---- Viajes ya iniciados ----
+  viajesEnCurso: Viaje[] = [];
+
+  constructor(
+    private authService: AuthService,
+    private operadoraService: OperadoraService,
+  ) {}
+
+  ngOnInit(): void {
+    this.usuario = this.authService.getUser();
+    this.cargarEstadoLocal();
+    this.cargarPendientes(this.usuario.idUsuario);
+  }
+
+  // ================== NAVEGACIÓN DE TABS ==================
+  cambiarTab(tab: TabOperadora) {
+    this.tabActiva = tab;
+    if (tab === 'pendientes') this.cargarPendientes(this.usuario.idUsuario);
+  }
+
+  getTotalPendientes(): number {
+    return this.solicitudesPendientes.length;
+  }
+
+  getTotalPropuestas(): number {
+    return this.propuestasEnCurso.length;
+  }
+
+  getTotalViajes(): number {
+    return this.viajesEnCurso.length;
+  }
+
+  // ================== ESTADO LOCAL (persistencia mientras el back no tiene endpoint de estado) ==================
+  private cargarEstadoLocal() {
+    const propuestas = localStorage.getItem(STORAGE_PROPUESTAS);
+    if (propuestas) this.propuestasEnCurso = JSON.parse(propuestas);
+
+    const viajes = localStorage.getItem(STORAGE_VIAJES);
+    if (viajes) this.viajesEnCurso = JSON.parse(viajes);
+  }
+
+  private guardarPropuestas() {
+    localStorage.setItem(STORAGE_PROPUESTAS, JSON.stringify(this.propuestasEnCurso));
+  }
+
+  private guardarViajes() {
+    localStorage.setItem(STORAGE_VIAJES, JSON.stringify(this.viajesEnCurso));
+  }
+
+  // ================== PENDIENTES ==================
+  cargarPendientes(userId: number) {
+    this.cargandoPendientes = true;
+    this.operadoraService.listarSolicitudesPendientes(userId).subscribe({
+      next: (data: Solicitud[]) => {
+        this.solicitudesPendientes = data;
+        this.cargandoPendientes = false;
+      },
+      error: (err) => {
+        this.cargandoPendientes = false;
+        console.error(err);
+      },
+    });
+  }
+
+  toggleBuscarConductoras(solicitud: Solicitud) {
+    if (this.solicitudExpandidaId === solicitud.idSolicitud) {
+      this.solicitudExpandidaId = null;
+      this.conductorasEncontradas = [];
+      return;
+    }
+
+    this.solicitudExpandidaId = solicitud.idSolicitud;
+    this.buscandoConductoras = true;
+    this.conductorasEncontradas = [];
+
+    this.operadoraService.conductorasDisponibles(solicitud.zona).subscribe({
+      next: (data: Usuario[]) => {
+        this.conductorasEncontradas = data;
+        this.buscandoConductoras = false;
+      },
+      error: (err) => {
+        this.buscandoConductoras = false;
+        Swal.fire('Error', 'No se pudieron buscar conductoras.', 'error');
+        console.error(err);
+      },
+    });
+  }
+
+  proponerConductora(solicitud: Solicitud, conductora: Usuario) {
+    this.operadoraService
+      .asignarPropuesta({ idSolicitud: solicitud.idSolicitud, idConductora: conductora.idUsuario })
+      .subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Propuesta enviada',
+            text: `Se le avisó a ${conductora.nombre}. Esperando que acepte.`,
+            timer: 2000,
+            showConfirmButton: false,
+          });
+
+          this.solicitudesPendientes = this.solicitudesPendientes.filter(
+            (s) => s.idSolicitud !== solicitud.idSolicitud,
+          );
+          this.propuestasEnCurso.push({ solicitud, conductora, patente: '' });
+          this.guardarPropuestas();
+
+          this.solicitudExpandidaId = null;
+          this.conductorasEncontradas = [];
+          this.cambiarTab('propuestas');
+        },
+        error: (err) => {
+          Swal.fire('Error', err.error?.error || 'No se pudo enviar la propuesta.', 'error');
+        },
+      });
+  }
+
+  iniciales(nombre: string): string {
+    if (!nombre) return '?';
+    const partes = nombre.trim().split(' ');
+    const primera = partes[0]?.[0] || '';
+    const segunda = partes[1]?.[0] || '';
+    return (primera + segunda).toUpperCase();
+  }
+
+  // ================== PROPUESTAS EN CURSO ==================
+  registrarViaje(propuesta: PropuestaEnCurso) {
+    if (!propuesta.patente || propuesta.patente.trim().length < 5) {
+      Swal.fire(
+        'Falta la patente',
+        'Ingresá la patente del vehículo para iniciar el viaje.',
+        'warning',
+      );
+      return;
+    }
+
+    this.operadoraService
+      .registrarViaje({
+        idSolicitud: propuesta.solicitud.idSolicitud,
+        idOperadora: this.usuario.idUsuario,
+        patenteVehiculo: propuesta.patente.trim(),
+      })
+      .subscribe({
+        next: (respuesta: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Viaje iniciado',
+            text: `${propuesta.conductora.nombre} está en camino.`,
+          });
+
+          this.propuestasEnCurso = this.propuestasEnCurso.filter(
+            (p) => p.solicitud.idSolicitud !== propuesta.solicitud.idSolicitud,
+          );
+          this.guardarPropuestas();
+
+          this.viajesEnCurso.push(respuesta.nuevoViaje);
+          this.guardarViajes();
+
+          this.cambiarTab('viajes');
+        },
+        error: (err) => {
+          Swal.fire(
+            'No se pudo iniciar',
+            err.error?.error || 'Verificá que la conductora ya haya aceptado la propuesta.',
+            'error',
+          );
+        },
+      });
+  }
+
+  cancelarPropuestaLocal(propuesta: PropuestaEnCurso) {
+    Swal.fire({
+      icon: 'question',
+      title: '¿Quitar esta propuesta de la lista?',
+      text: 'Esto solo la saca de tu panel, no cancela nada en el sistema.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, quitar',
+      cancelButtonText: 'No',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+      this.propuestasEnCurso = this.propuestasEnCurso.filter(
+        (p) => p.solicitud.idSolicitud !== propuesta.solicitud.idSolicitud,
+      );
+      this.guardarPropuestas();
+    });
+  }
+
+  // ================== VIAJES EN CURSO ==================
+  finalizarViaje(viaje: Viaje) {
+    Swal.fire({
+      icon: 'question',
+      title: '¿Finalizar viaje?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, finalizar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      this.operadoraService.finalizarViaje(viaje.idViaje).subscribe({
+        next: (respuesta: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Viaje finalizado',
+            text: `Monto cobrado: $${respuesta.viaje.monto}`,
+          });
+
+          this.viajesEnCurso = this.viajesEnCurso.filter((v) => v.idViaje !== viaje.idViaje);
+          this.guardarViajes();
+        },
+        error: (err) => {
+          Swal.fire('Error', err.error?.error || 'No se pudo finalizar el viaje.', 'error');
+        },
+      });
+    });
+  }
+}

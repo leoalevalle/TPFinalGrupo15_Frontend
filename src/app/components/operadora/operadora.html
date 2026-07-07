@@ -1,0 +1,248 @@
+<div class="container py-5 operadora-wrapper">
+  <div class="text-center mb-4">
+    <div class="operadora-icon-circle mx-auto mb-3">
+      <i class="bi bi-headset"></i>
+    </div>
+    <h2 class="operadora-title">Panel de Operadora</h2>
+    <p class="operadora-subtitle">Hola, {{ usuario.nombre }}</p>
+  </div>
+
+  <!-- ===================== STATS ===================== -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <i class="bi bi-inbox-fill"></i>
+        <div>
+          <small>Pendientes</small>
+          <h4>{{ getTotalPendientes() }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <i class="bi bi-hourglass-split"></i>
+        <div>
+          <small>Esperando conductora</small>
+          <h4>{{ getTotalPropuestas() }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <i class="bi bi-car-front-fill"></i>
+        <div>
+          <small>En curso</small>
+          <h4>{{ getTotalViajes() }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TABS ===================== -->
+  <ul class="nav nav-pills operadora-tabs mb-4 flex-wrap gap-2">
+    <li class="nav-item">
+      <button
+        class="nav-link"
+        [class.active]="tabActiva === 'pendientes'"
+        (click)="cambiarTab('pendientes')"
+      >
+        <i class="bi bi-inbox-fill me-1"></i> Pendientes
+        <span class="badge tab-badge">{{ getTotalPendientes() }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        class="nav-link"
+        [class.active]="tabActiva === 'propuestas'"
+        (click)="cambiarTab('propuestas')"
+      >
+        <i class="bi bi-hourglass-split me-1"></i> En espera
+        <span class="badge tab-badge">{{ getTotalPropuestas() }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        class="nav-link"
+        [class.active]="tabActiva === 'viajes'"
+        (click)="cambiarTab('viajes')"
+      >
+        <i class="bi bi-car-front-fill me-1"></i> En curso
+        <span class="badge tab-badge">{{ getTotalViajes() }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <!-- ===================== TAB: PENDIENTES ===================== -->
+  <div *ngIf="tabActiva === 'pendientes'">
+    <div class="card operadora-card shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0"><i class="bi bi-inbox-fill me-2"></i>Solicitudes pendientes</h5>
+          <button class="btn btn-sm btn-outline-pink" (click)="cargarPendientes(usuario.idUsuario)">
+            <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+          </button>
+        </div>
+        <hr />
+
+        <div *ngIf="cargandoPendientes" class="text-center text-muted py-4">
+          <span class="spinner-border spinner-border-sm me-2"></span> Cargando...
+        </div>
+
+        <div *ngIf="!cargandoPendientes && solicitudesPendientes.length === 0" class="empty-state">
+          <i class="bi bi-emoji-smile"></i>
+          <p>No hay solicitudes pendientes por el momento.</p>
+        </div>
+
+        <div class="solicitud-item" *ngFor="let sol of solicitudesPendientes">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div class="ruta-info">
+              <div class="ruta-linea">
+                <i class="bi bi-geo-alt-fill text-pink"></i>
+                <span>{{ sol.origen }}</span>
+              </div>
+              <div class="ruta-conector"></div>
+              <div class="ruta-linea">
+                <i class="bi bi-flag-fill text-pink"></i>
+                <span>{{ sol.destino }}</span>
+              </div>
+              <div class="ruta-meta">
+                <span><i class="bi bi-map me-1"></i>{{ sol.zona }}</span>
+                <span><i class="bi bi-people-fill me-1"></i>{{ sol.cantPasajeros }}</span>
+                <span *ngIf="sol.fechaHora"
+                  ><i class="bi bi-clock me-1"></i>{{ sol.fechaHora | date: 'short' }}</span
+                >
+              </div>
+            </div>
+
+            <button class="btn btn-sm btn-pink" (click)="toggleBuscarConductoras(sol)">
+              <i class="bi bi-search me-1"></i>
+              {{
+                solicitudExpandidaId === sol.idSolicitud ? 'Cerrar búsqueda' : 'Buscar conductora'
+              }}
+            </button>
+          </div>
+
+          <!-- Panel expandido con conductoras disponibles -->
+          <div class="conductoras-panel mt-3" *ngIf="solicitudExpandidaId === sol.idSolicitud">
+            <div *ngIf="buscandoConductoras" class="text-center text-muted py-3">
+              <span class="spinner-border spinner-border-sm me-2"></span> Buscando en zona
+              {{ sol.zona }}...
+            </div>
+
+            <div
+              *ngIf="!buscandoConductoras && conductorasEncontradas.length === 0"
+              class="empty-state-mini"
+            >
+              <i class="bi bi-emoji-neutral"></i>
+              No hay conductoras disponibles en esta zona ahora mismo.
+            </div>
+
+            <div class="row g-2" *ngIf="!buscandoConductoras">
+              <div class="col-md-6" *ngFor="let cond of conductorasEncontradas">
+                <div class="conductora-mini-card">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-circle">{{ iniciales(cond.nombre) }}</div>
+                    <div>
+                      <strong>{{ cond.nombre }}</strong>
+                      <div class="text-muted small">{{ cond.telefono }}</div>
+                    </div>
+                  </div>
+                  <button
+                    class="btn btn-sm btn-outline-pink"
+                    (click)="proponerConductora(sol, cond)"
+                  >
+                    Proponer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: PROPUESTAS EN ESPERA ===================== -->
+  <div *ngIf="tabActiva === 'propuestas'">
+    <div class="card operadora-card shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="mb-3">
+          <i class="bi bi-hourglass-split me-2"></i>Esperando confirmación de conductora
+        </h5>
+        <hr />
+
+        <div *ngIf="propuestasEnCurso.length === 0" class="empty-state">
+          <i class="bi bi-hourglass"></i>
+          <p>No hay propuestas pendientes de confirmación.</p>
+        </div>
+
+        <div class="propuesta-item" *ngFor="let prop of propuestasEnCurso">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar-circle">{{ iniciales(prop.conductora.nombre) }}</div>
+              <div>
+                <strong>{{ prop.conductora.nombre }}</strong>
+                <div class="text-muted small">
+                  {{ prop.solicitud.origen }} → {{ prop.solicitud.destino }}
+                </div>
+              </div>
+            </div>
+            <button
+              class="btn-close"
+              (click)="cancelarPropuestaLocal(prop)"
+              title="Quitar de la lista"
+            ></button>
+          </div>
+
+          <div class="input-group">
+            <span class="input-group-text patente-icon"
+              ><i class="bi bi-credit-card-2-front-fill"></i
+            ></span>
+            <input
+              class="form-control"
+              placeholder="Patente del vehículo"
+              [(ngModel)]="prop.patente"
+            />
+            <button class="btn btn-pink" (click)="registrarViaje(prop)">
+              <i class="bi bi-play-fill me-1"></i> Iniciar viaje
+            </button>
+          </div>
+          <small class="text-muted d-block mt-1">
+            Confirmá con la conductora que ya aceptó la propuesta antes de iniciar el viaje.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: VIAJES EN CURSO ===================== -->
+  <div *ngIf="tabActiva === 'viajes'">
+    <div class="card operadora-card shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="mb-3"><i class="bi bi-car-front-fill me-2"></i>Viajes en curso</h5>
+        <hr />
+
+        <div *ngIf="viajesEnCurso.length === 0" class="empty-state">
+          <i class="bi bi-signpost-split"></i>
+          <p>No hay viajes en curso en este momento.</p>
+        </div>
+
+        <div
+          class="viaje-item d-flex justify-content-between align-items-center flex-wrap gap-2"
+          *ngFor="let viaje of viajesEnCurso"
+        >
+          <div>
+            <strong>Viaje #{{ viaje.idViaje }}</strong>
+            <div class="text-muted small">
+              <i class="bi bi-credit-card-2-front-fill me-1"></i
+              >{{ viaje.patenteVehiculoUtilizado }}
+            </div>
+          </div>
+          <button class="btn btn-sm btn-outline-danger" (click)="finalizarViaje(viaje)">
+            <i class="bi bi-flag-fill me-1"></i> Finalizar viaje
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
