@@ -1,0 +1,174 @@
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="border-bottom pb-2"><i class="fa-solid fa-user-gear text-primary"></i> Panel de Control Administrativo — TaxFem</h2>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-5">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+      <h4 class="mb-0"><i class="fa-solid fa-chart-line"></i> Estadísticas e Informe Operacional</h4>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" [(ngModel)]="mesFiltro" (change)="obtenerInforme()">
+          <option [ngValue]="1">Enero</option>
+          <option [ngValue]="2">Febrero</option>
+          <option [ngValue]="3">Marzo</option>
+          <option [ngValue]="4">Abril</option>
+          <option [ngValue]="5">Mayo</option>
+          <option [ngValue]="6">Junio</option>
+          <option [ngValue]="7">Julio</option>
+          <option [ngValue]="8">Agosto</option>
+          <option [ngValue]="9">Septiembre</option>
+          <option [ngValue]="10">Octubre</option>
+          <option [ngValue]="11">Noviembre</option>
+          <option [ngValue]="12">Diciembre</option>
+        </select>
+        <select class="form-select form-select-sm" [(ngModel)]="anioFiltro" (change)="obtenerInforme()">
+          <option [ngValue]="2026">2026</option>
+          <option [ngValue]="2027">2027</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-body bg-light">
+      <div class="row text-center" *ngIf="informeData">
+
+        <div class="col-md-4">
+            <div class="p-3 bg-white border rounded">
+            <h6 class="text-muted text-uppercase">Viajes Completados</h6>
+            <h3 class="text-success fw-bold">
+                {{ informeData.serviciosCompletados }}
+            </h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 bg-white border rounded">
+            <h6 class="text-muted text-uppercase">Recaudación Total</h6>
+            <h3 class="text-primary fw-bold">
+                ${{ informeData.recaudacionTotal }}
+            </h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 bg-white border rounded">
+            <h6 class="text-muted text-uppercase">Viajes Cancelados</h6>
+            <h3 class="text-warning fw-bold">
+                {{ informeData.serviciosCancelados }}
+            </h3>
+            </div>
+        </div>
+
+        </div>
+      <div *ngIf="!informeData" class="text-center text-muted py-2">
+        No se registran transacciones operativas en el período seleccionado.
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-5">
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fa-solid fa-car-plus"></i> Incorporar Vehículo</h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="registrarVehiculo()">
+            <div class="mb-3">
+              <label class="form-label font-monospace small">Marca</label>
+              <input type="text" class="form-control" [(ngModel)]="nuevoVehiculo.marca" name="marca" placeholder="Ej: Fiat" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label font-monospace small">Modelo</label>
+              <input type="text" class="form-control" [(ngModel)]="nuevoVehiculo.modelo" name="modelo" placeholder="Ej: Cronos" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label font-monospace small">Color</label>
+              <input type="text" class="form-control" [(ngModel)]="nuevoVehiculo.color" name="color" placeholder="Ej: Blanco" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label font-monospace small">Patente / Dominio</label>
+              <input type="text" class="form-control" [(ngModel)]="nuevoVehiculo.patente" name="patente" placeholder="Ej: AF123JK" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 font-weight-bold">
+              <i class="fa-solid fa-plus"></i> Guardar en Flota
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fa-solid fa-list-check"></i> Monitoreo de Flota Activa</h5>
+          <button class="btn btn-sm btn-light" (click)="cargarVehiculos()"><i class="fa-solid fa-rotate"></i> Actualizar</button>
+        </div>
+        <div class="card-body p-0 table-responsive">
+          <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Vehículo</th>
+                <th>Patente</th>
+                <th class="text-center">Estado</th>
+                <th class="text-end">Acciones Administrativas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let coche of vehiculos">
+                <td><strong>#{{ coche.idVehiculo }}</strong></td>
+                <td>
+                  <span class="d-block fw-bold">{{ coche.marca }} {{ coche.modelo }}</span>
+                  <small class="text-muted">Color: {{ coche.color }}</small>
+                </td>
+                <td><span class="badge bg-light text-dark border font-monospace fs-6">{{ coche.patente }}</span></td>
+                <td class="text-center">
+                  <span *ngIf="coche.activo" class="badge bg-success-subtle text-success border border-success p-2">ACTIVO</span>
+                  <span *ngIf="!coche.activo" class="badge bg-danger-subtle text-danger border border-danger p-2">INACTIVO / BAJA</span>
+                </td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <button *ngIf="coche.activo" class="btn btn-outline-danger" (click)="cambiarEstadoVehiculo(coche.idVehiculo, coche.activo)" title="Dar de Baja">
+                      <i class="fa-solid fa-toggle-on"></i> Desactivar
+                    </button>
+                    <button *ngIf="!coche.activo" class="btn btn-outline-success" (click)="cambiarEstadoVehiculo(coche.idVehiculo, coche.activo)" title="Reactivar">
+                      <i class="fa-solid fa-toggle-off"></i> Activar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="vehiculos.length === 0">
+                <td colspan="5" class="text-center text-muted py-4">No se registran vehículos cargados en el sistema.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-warning">
+    <div class="card-header bg-warning text-dark fw-bold">
+      <i class="fa-solid fa-hammer"></i> Auditoría de Registros Pendientes (Accesos Directos rápidos de Prueba)
+    </div>
+    <div class="card-body">
+      <p class="small text-muted">Como las listas completas de pasajeras/conductoras dependen de sus respectivas tablas, usa estos botones rápidos para forzar llamadas de prueba a los endpoints con identificadores de ejemplo (ID: 1):</p>
+      <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-sm btn-outline-dark" (click)="alterarEstadoUsuario(1, true)">
+          <i class="fa-solid fa-user-slash"></i> Banear Usuario #1
+        </button>
+        <button class="btn btn-sm btn-outline-dark" (click)="evaluarPasajera(1, true)">
+          <i class="fa-solid fa-user-check"></i> Aprobar Pasajera #1
+        </button>
+        <button class="btn btn-sm btn-outline-dark" (click)="evaluarConductora(1, true)">
+          <i class="fa-solid fa-id-card"></i> Habilitar Conductora #1
+        </button>
+        <button class="btn btn-sm btn-outline-dark" (click)="aprobarCambioCocheChofer(10, true)">
+          <i class="fa-solid fa-code-pull-request"></i> Aprobar Solicitud de Coche #10
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
