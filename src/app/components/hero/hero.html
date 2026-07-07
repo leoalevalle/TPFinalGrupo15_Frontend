@@ -1,26 +1,18 @@
 <section class="hero">
   <!-- Imagen -->
-  <img
-    src="assets/img/hero.png"
-    alt="TaxiFem"
-    class="hero-image">
+  <img src="assets/img/hero.png" alt="TaxiFem" class="hero-image" />
 
   <!-- Capa rosa -->
   <div class="overlay"></div>
   <div class="container hero-content">
     <div class="hero-text">
       <h1>
-        Viaja segura,<br>
+        Viaja segura,<br />
         viaja con nosotras.
       </h1>
-      <p>
-        El transporte pensado por y para mujeres.
-      </p>
-      <div class="hero-buttons">
-        <button
-          class="btn btn-light-custom"
-          data-bs-toggle="modal"
-          data-bs-target="#loginModal">
+      <p>El transporte pensado por y para mujeres.</p>
+      <div *ngIf="!authService.isLoggedIn()" class="hero-buttons">
+        <button class="btn btn-light-custom" data-bs-toggle="modal" data-bs-target="#loginModal">
           Quiero Viajar
         </button>
 
@@ -28,43 +20,39 @@
           class="btn btn-pink"
           data-bs-toggle="modal"
           data-bs-target="#loginModal"
-          (click)="abrirRegistroConductora()">
+          (click)="abrirRegistroConductora()"
+        >
           Quiero Manejar
         </button>
-
       </div>
-
     </div>
-
   </div>
-
 </section>
 
 <section class="security">
-    <div class="container">
-        <h2>Seguridad Garantizada</h2>
-        <div class="security-items">
-            <div class="item">
-                <div class="icon">
-                    <i class="bi bi-patch-check-fill"></i>
-                </div>
-                <span>Conductoras verificadas</span>
-            </div>
-
-            <div class="item">
-                <div class="icon">
-                    <i class="bi bi-shield-check"></i>
-                </div>
-                <span>Monitoreo 24/7</span>
-            </div>
-
-            <div class="item">
-                <div class="icon">
-                    <i class="bi bi-person-vcard-fill"></i>
-                </div>
-                <span>Identidad validada</span>
-            </div>
+  <div class="container">
+    <h2>Seguridad Garantizada</h2>
+    <div class="security-items">
+      <div class="item">
+        <div class="icon">
+          <i class="bi bi-patch-check-fill"></i>
         </div>
-    </div>
+        <span>Conductoras verificadas</span>
+      </div>
 
+      <div class="item">
+        <div class="icon">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <span>Monitoreo 24/7</span>
+      </div>
+
+      <div class="item">
+        <div class="icon">
+          <i class="bi bi-person-vcard-fill"></i>
+        </div>
+        <span>Identidad validada</span>
+      </div>
+    </div>
+  </div>
 </section>

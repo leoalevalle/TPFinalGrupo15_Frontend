@@ -14,11 +14,13 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/login`, credentials);
   }
 
+  // Registro de Pasajera
   register(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/register`, userData);
   }
 
-  registerConductora(data: any) {
+  // Registro de Conductora (incluye datos de vehículo)
+  registerConductora(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/conductoras/register`, data);
   }
 
@@ -44,6 +46,4 @@ export class AuthService {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
   }
-
- 
 }

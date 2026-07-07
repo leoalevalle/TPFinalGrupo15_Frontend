@@ -54,3 +54,8 @@
   border: none;
   font-size: 1.8rem;
 }
+.usuario-saludo {
+  font-weight: 600;
+  color: #3a3a3a;
+  font-size: 0.9rem;
+}

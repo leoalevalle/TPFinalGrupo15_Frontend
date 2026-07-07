@@ -1,0 +1,152 @@
+<div class="container py-5 pasajera-wrapper">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+      <div class="text-center mb-4">
+        <div class="pasajera-icon-circle mx-auto mb-3">
+          <i class="bi bi-car-front-fill"></i>
+        </div>
+        <h2 class="pasajera-title">¡Hola, {{ usuario?.nombre }}!</h2>
+        <p class="pasajera-subtitle">¿A dónde te llevamos hoy?</p>
+      </div>
+
+      <!-- Estado del viaje actual -->
+      <div class="card pasajera-card shadow-sm mb-4" *ngIf="solicitudActual">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0"><i class="bi bi-signpost-split-fill me-2"></i>Tu viaje</h5>
+            <span
+              class="badge estado-badge"
+              [ngClass]="{
+                'bg-warning text-dark': solicitudActual.estado === 'Pendiente',
+                'bg-info text-white': solicitudActual.estado === 'Propuesta',
+                'bg-success': solicitudActual.estado === 'Aceptada',
+                'bg-danger':
+                  solicitudActual.estado === 'Cancelada' || solicitudActual.estado === 'Rechazada',
+              }"
+            >
+              {{ solicitudActual.estado }}
+            </span>
+          </div>
+
+          <hr class="pasajera-divider" />
+
+          <div class="viaje-detalle">
+            <div class="detalle-item">
+              <i class="bi bi-geo-alt-fill"></i>
+              <div>
+                <small class="text-muted d-block">Origen</small>
+                {{ solicitudActual.origen }}
+              </div>
+            </div>
+
+            <div class="detalle-item">
+              <i class="bi bi-flag-fill"></i>
+              <div>
+                <small class="text-muted d-block">Destino</small>
+                {{ solicitudActual.destino }}
+              </div>
+            </div>
+
+            <div class="detalle-item">
+              <i class="bi bi-map-fill"></i>
+              <div>
+                <small class="text-muted d-block">Zona</small>
+                {{ solicitudActual.zona }}
+              </div>
+            </div>
+
+            <div class="detalle-item">
+              <i class="bi bi-people-fill"></i>
+              <div>
+                <small class="text-muted d-block">Pasajeros</small>
+                {{ solicitudActual.cantPasajeros }}
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="btn btn-outline-pink w-100 mt-4"
+            *ngIf="puedeCancelar"
+            (click)="cancelarSolicitud()"
+          >
+            <i class="bi bi-x-circle me-1"></i> Cancelar viaje
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulario para nueva solicitud -->
+      <div class="card pasajera-card shadow-sm" *ngIf="!solicitudActual">
+        <div class="card-body p-4">
+          <h5 class="mb-4"><i class="bi bi-car-front me-2"></i>Solicitar un viaje</h5>
+
+          <form [formGroup]="solicitudForm" (ngSubmit)="solicitarViaje()" novalidate>
+            <div class="mb-3">
+              <label class="form-label"><i class="bi bi-geo-alt-fill me-1"></i>Origen</label>
+              <input
+                class="form-control pasajera-input"
+                formControlName="origen"
+                placeholder="Ej: Av. Belgrano 123"
+              />
+              <small class="text-danger" *ngIf="f['origen'].touched && f['origen'].invalid">
+                El origen es requerido.
+              </small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><i class="bi bi-flag-fill me-1"></i>Destino</label>
+              <input
+                class="form-control pasajera-input"
+                formControlName="destino"
+                placeholder="Ej: Terminal de ómnibus"
+              />
+              <small class="text-danger" *ngIf="f['destino'].touched && f['destino'].invalid">
+                El destino es requerido.
+              </small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><i class="bi bi-map-fill me-1"></i>Zona</label>
+              <select class="form-select pasajera-input" formControlName="zona">
+                <option value="">-- Seleccione --</option>
+                <option value="Centro">Centro</option>
+                <option value="Norte">Norte</option>
+                <option value="Sur">Sur</option>
+                <option value="Este">Este</option>
+                <option value="Oeste">Oeste</option>
+              </select>
+              <small class="text-danger" *ngIf="f['zona'].touched && f['zona'].invalid">
+                Seleccioná una zona.
+              </small>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label"
+                ><i class="bi bi-people-fill me-1"></i>Cantidad de pasajeros</label
+              >
+              <input
+                class="form-control pasajera-input"
+                type="number"
+                formControlName="cantPasajeros"
+                min="1"
+                max="4"
+              />
+              <small
+                class="text-danger"
+                *ngIf="f['cantPasajeros'].touched && f['cantPasajeros'].invalid"
+              >
+                Entre 1 y 4 pasajeros.
+              </small>
+            </div>
+
+            <button class="btn btn-pink w-100" type="submit" [disabled]="cargando">
+              <span *ngIf="!cargando"><i class="bi bi-send-fill me-1"></i> Solicitar viaje</span>
+              <span *ngIf="cargando">
+                <span class="spinner-border spinner-border-sm me-1"></span> Enviando...
+              </span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

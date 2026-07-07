@@ -1,11 +1,9 @@
-﻿import { Component } from '@angular/core';
+﻿import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule , Validators, FormGroup} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-
-
 
 @Component({
   selector: 'app-login-modal',
@@ -23,11 +21,12 @@ export class LoginModal {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cd: ChangeDetectorRef,
   ) {
     this.loginForm = this.fb.group({
       nomUsuario: ['', Validators.required],
-      contrasenia: ['', Validators.required]
+      contrasenia: ['', Validators.required],
     });
 
     this.registerForm = this.fb.group({
@@ -36,31 +35,30 @@ export class LoginModal {
       email: ['', [Validators.required, Validators.email]],
       nomUsuario: ['', Validators.required],
       contrasenia: ['', [Validators.required, Validators.minLength(6)]],
-      sexo: ['', Validators.required]
+      sexo: ['', Validators.required],
     });
 
     this.conductoraForm = this.fb.group({
-        // Datos personales
-        nombre: ['', Validators.required],
-        telefono: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
-        nomUsuario: ['', Validators.required],
-        contrasenia: ['', [Validators.required, Validators.minLength(6)]],
-        sexo: ['', Validators.required],
+      // Datos personales
+      nombre: ['', Validators.required],
+      telefono: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      nomUsuario: ['', Validators.required],
+      contrasenia: ['', [Validators.required, Validators.minLength(6)]],
+      sexo: ['', Validators.required],
 
-        // Datos del vehículo
-        marca: ['', Validators.required],
-        modelo: ['', Validators.required],
-        color: ['', Validators.required],
-        patente: ['', Validators.required]
-
+      // Datos del vehículo
+      marca: ['', Validators.required],
+      modelo: ['', Validators.required],
+      color: ['', Validators.required],
+      patente: ['', Validators.required],
     });
   }
 
- 
-  
   iniciarSesion() {
-    if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) {
+      return;
+    }
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (res: any) => {
@@ -70,34 +68,45 @@ export class LoginModal {
           icon: 'success',
           title: 'Inicio de sesión exitoso',
           timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
+          this.cerrarModal();
+
           this.redirigirPorRol(res.user.rol);
+
+          this.cd.detectChanges();
         });
       },
       error: () => {
         Swal.fire({
           icon: 'error',
-          title: 'Credenciales incorrectas'
+          title: 'Credenciales incorrectas',
         });
-      }
+      },
     });
   }
-
+  private cerrarModal() {
+    const modalEl = document.getElementById('loginModal');
+    if (modalEl) {
+      // @ts-ignore - bootstrap viene del script global, no como import
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      modalInstance?.hide();
+    }
+  }
   registrarse() {
     if (this.registerForm.invalid) return;
 
     const nuevaPasajera = {
       ...this.registerForm.value,
       rol: 1,
-      activo: true
+      activo: true,
     };
 
     this.authService.register(nuevaPasajera as any).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
-          title: 'Registro exitoso'
+          title: 'Registro exitoso',
         });
 
         this.activeTab = 'login';
@@ -106,46 +115,42 @@ export class LoginModal {
       error: () => {
         Swal.fire({
           icon: 'error',
-          title: 'Error al registrarse'
+          title: 'Error al registrarse',
         });
-      }
+      },
     });
   }
 
   registrarConductora() {
-
     if (this.conductoraForm.invalid) return;
-    this.authService
-        .registerConductora(this.conductoraForm.value)
-        .subscribe({
-          next: () => {
-            Swal.fire({
-              icon:'success',
-              title:'Solicitud enviada',
-              text:'Tu solicitud será revisada por una administradora.'
-            });
-            this.activeTab='login';
-            this.conductoraForm.reset();
-          },
+    this.authService.registerConductora(this.conductoraForm.value).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Solicitud enviada',
+          text: 'Tu solicitud será revisada por una administradora.',
+        });
+        this.activeTab = 'login';
+        this.conductoraForm.reset();
+      },
 
-          error:()=>{
-            Swal.fire({
-              icon:'info',
-              title:'Backend pendiente',
-              text:'La interfaz ya está lista. Falta implementar el endpoint de registro de conductoras.'
-            });
-
-          }
-
-     });
-
+      error: () => {
+        Swal.fire({
+          icon: 'info',
+          title: 'Backend pendiente',
+          text: 'La interfaz ya está lista. Falta implementar el endpoint de registro de conductoras.',
+        });
+      },
+    });
   }
 
-
   redirigirPorRol(rol: number) {
+    console.log('6. Entrando a redirigirPorRol con rol:', rol);
+
     switch (rol) {
       case 1:
         this.router.navigate(['/pasajera']);
+
         break;
 
       case 2:
@@ -157,8 +162,10 @@ export class LoginModal {
         break;
 
       case 4:
-        this.router.navigate(['/admin']);
+        this.router.navigate(['/administradora']);
         break;
+      default:
+        console.log('ROL NO RECONOCIDO:', rol);
     }
   }
 }
