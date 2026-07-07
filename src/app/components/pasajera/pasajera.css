@@ -1,0 +1,119 @@
+:host {
+  --taxifem-pink: #ff4f8b;
+  --taxifem-pink-dark: #e63e77;
+  --taxifem-pink-light: #ffe3ee;
+}
+
+.pasajera-wrapper {
+  min-height: 70vh;
+}
+
+.pasajera-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--taxifem-pink), var(--taxifem-pink-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.6rem;
+  box-shadow: 0 6px 16px rgba(230, 62, 119, 0.35);
+}
+
+.pasajera-title {
+  font-weight: 700;
+  color: #3a3a3a;
+}
+
+.pasajera-subtitle {
+  color: #8a8a8a;
+}
+
+.pasajera-card {
+  border: none;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.pasajera-divider {
+  border-top: 1px solid var(--taxifem-pink-light);
+  margin: 0.5rem 0 1.25rem;
+}
+
+.pasajera-input {
+  border-radius: 10px;
+  border: 1px solid #eee;
+  padding: 0.6rem 0.9rem;
+}
+
+.pasajera-input:focus {
+  border-color: var(--taxifem-pink);
+  box-shadow: 0 0 0 0.2rem rgba(255, 79, 139, 0.15);
+}
+
+.form-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.viaje-detalle {
+  display: grid;
+  gap: 1rem;
+}
+
+.detalle-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.detalle-item i {
+  color: var(--taxifem-pink);
+  font-size: 1.2rem;
+  margin-top: 2px;
+}
+
+.estado-badge {
+  font-size: 0.8rem;
+  padding: 0.45em 0.9em;
+  border-radius: 20px;
+}
+
+.btn-pink {
+  background: linear-gradient(135deg, var(--taxifem-pink), var(--taxifem-pink-dark));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.btn-pink:hover {
+  opacity: 0.9;
+  color: #fff;
+}
+
+.btn-pink:disabled {
+  opacity: 0.6;
+  color: #fff;
+}
+
+.btn-outline-pink {
+  background: transparent;
+  border: 2px solid var(--taxifem-pink);
+  color: var(--taxifem-pink-dark);
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-pink:hover {
+  background: var(--taxifem-pink);
+  color: #fff;
+}

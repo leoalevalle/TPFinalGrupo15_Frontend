@@ -1,14 +1,12 @@
 <app-header></app-header>
+<app-hero *ngIf="mostrarHero"></app-hero>
 
-<app-hero></app-hero>
-
-<main class="container" style="min-height: 80vh;">
-
+<main class="container" style="min-height: 80vh">
   <section class="row">
-    <div class="col-12"> 
+    <div class="col-12">
       <router-outlet></router-outlet>
     </div>
   </section>
-
 </main>
+
 <app-footer></app-footer>

@@ -1,20 +1,32 @@
 ﻿<nav class="navbar navbar-expand-lg bg-white shadow-sm py-3">
   <div class="container">
-
     <a class="navbar-brand fw-bold" routerLink="/">
-       <img src="assets/img/logo-taxifem.png" alt="TaxiFem" class="logo me-2">
-       <span class="brand-text">TaxiFem</span>
+      <img src="assets/img/logo-taxifem.png" alt="TaxiFem" class="logo me-2" />
+      <span class="brand-text">TaxiFem</span>
     </a>
-    
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
-    
+
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mx-auto gap-3">
         <li class="nav-item">
-          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a>
+          <a
+            class="nav-link"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            >Inicio</a
+          >
         </li>
         <li class="nav-item">
           <a class="nav-link" routerLink="/hello" routerLinkActive="active">Nosotras</a>
@@ -25,25 +37,37 @@
         <li class="nav-item">
           <a class="nav-link" routerLink="/hello" routerLinkActive="active">Seguridad</a>
         </li>
+        <li *ngIf="getUserRole() === 1" class="nav-item">
+          <a class="nav-link" routerLink="/pasajera" routerLinkActive="active">solicitar viaje</a>
+        </li>
+        <li *ngIf="getUserRole() === 2" class="nav-item">
+          <a class="nav-link" routerLink="/conductora" routerLinkActive="active">conductora</a>
+        </li>
+        <li *ngIf="getUserRole() === 3" class="nav-item">
+          <a class="nav-link" routerLink="/operadora" routerLinkActive="active">operadora</a>
+        </li>
+        <li *ngIf="getUserRole() === 4" class="nav-item">
+          <a class="nav-link" routerLink="/administradora" routerLinkActive="active"
+            >administración</a
+          >
+        </li>
       </ul>
-      <br>
-      <div class="d-flex gap-2">
-        <button
-          class="btn btn-outline-custom"
-          data-bs-toggle="modal"
-          data-bs-target="#loginModal"
-         >
+      <br />
+      <div *ngIf="!getIsLoggedIn()" class="d-flex gap-2">
+        <button class="btn btn-outline-custom" data-bs-toggle="modal" data-bs-target="#loginModal">
           Iniciar Sesión
         </button>
 
         <button
           class="btn btn-outline-custom ms-2"
           data-bs-toggle="modal"
-          data-bs-target="#googleModal">
+          data-bs-target="#googleModal"
+        >
           Acceder con Google
         </button>
-        
-
+      </div>
+      <div *ngIf="getIsLoggedIn()" class="d-flex gap-2">
+        <button class="btn btn-outline-custom" (click)="cerrarSesion()">Cerrar Sesión</button>
       </div>
     </div>
   </div>
