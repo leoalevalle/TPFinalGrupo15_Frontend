@@ -12,32 +12,36 @@ export class GeocodingService {
 
   constructor(private http: HttpClient) {}
 
-  obtenerNombreZona(lat: number, lng: number): Observable<string> {
-  const headers = new HttpHeaders()
-    .set('X-RapidAPI-Key', this.apiKey)
-    .set('X-RapidAPI-Host', this.apiHost);
+  obtenerUbicacion(lat: number, lon: number): Observable<{ origen: string, zona: string }> {
 
-  const url = `${this.apiUrl}?lat=${lat}&lon=${lng}&accept-language=es`;
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
 
-  return this.http.get<any>(url, { headers }).pipe(
-    map(res => {
-      console.log("Respuesta completa de la API:", res);
-      if (res.display_name) {
-        const partes = res.display_name.split(',');
-        return partes.slice(0, 3).join(',').trim();
-      }
-      if (res.address) {
-        const calle = res.address.road || res.address.pedestrian || 'Calle desconocida';
-        const altura = res.address.house_number || '';
-        const barrio = res.address.suburb || res.address.neighbourhood || '';
-        let direccionEspecifica = `${calle} ${altura}`.trim();
-        if (barrio) {
-          direccionEspecifica += `, ${barrio}`;
-        }
-        return direccionEspecifica;
-      }
-      return 'Ubicación Detectada';
+  return this.http.get<any>(url).pipe(
+
+    map(resp => {
+
+      const a = resp.address;
+
+      const origen = [
+        a.road,
+        a.house_number,
+        a.neighbourhood
+      ]
+      .filter(Boolean)
+      .join(', ');
+
+      const zona = a.neighbourhood
+        ? a.neighbourhood.replace(/^Barrio\s+/i, '').trim()
+        : 'Centro';
+
+      return {
+        origen,
+        zona
+      };
+
     })
+
   );
+
  }
 }

@@ -47,13 +47,11 @@
               </div>
             </div>
 
-            <div class="detalle-item">
-              <i class="bi bi-map-fill"></i>
-              <div>
-                <small class="text-muted d-block">Zona</small>
-                {{ solicitudActual.zona }}
-              </div>
-            </div>
+            <input
+                class="form-control"
+                formControlName="zona"
+                readonly
+            >
 
             <div class="detalle-item">
               <i class="bi bi-people-fill"></i>
@@ -105,17 +103,14 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label"><i class="bi bi-map-fill me-1"></i>Zona</label>
-              <select class="form-select pasajera-input" formControlName="zona">
-                <option value="">-- Seleccione --</option>
-                <option value="Centro">Centro</option>
-                <option value="Norte">Norte</option>
-                <option value="Sur">Sur</option>
-                <option value="Este">Este</option>
-                <option value="Oeste">Oeste</option>
-              </select>
+              <label class="form-label"><i class="bi bi-flag-fill me-1"></i>Zona</label>
+              <input
+                class="form-control pasajera-input"
+                formControlName="zona"
+                placeholder="Ej: Centro"
+              />
               <small class="text-danger" *ngIf="f['zona'].touched && f['zona'].invalid">
-                Seleccioná una zona.
+                La zona es requerida.
               </small>
             </div>
 
