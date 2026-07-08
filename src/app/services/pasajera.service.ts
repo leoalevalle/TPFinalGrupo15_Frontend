@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class PasajeraService {
-  private api = 'http://localhost:3000/api';
+  private api = 'http://localhost:3000/api/transaccion';
 
   constructor(
     private http: HttpClient,
@@ -20,23 +20,34 @@ export class PasajeraService {
     });
   }
 
-  crearSolicitud(data: {
-    idPasajera: number;
-    origen: string;
-    destino: string;
-    zona: string;
-    cantPasajeros: number;
-  }): Observable<any> {
-    return this.http.post(`${this.api}/solicitudes/${data.idPasajera}`, data, {
-      headers: this.headers(),
-    });
+  // POST /api/solicitudes
+  crearSolicitudViaje(datosSolicitud: { idPasajera: number; origen: string; destino: string; tarifaEstimada?: number }): Observable<any> {
+    return this.http.post<any>(`${this.api}/solicitudes`, datosSolicitud);
   }
 
+  // PUT /api/solicitudes/:id/cancelar
   cancelarSolicitud(idSolicitud: number): Observable<any> {
     return this.http.put(
       `${this.api}/solicitudes/${idSolicitud}/cancelar`,
       {},
       { headers: this.headers() },
     );
+  }
+
+  //Ruta: POST /api/viajes
+  registrarViaje(datosViaje: { idSolicitud: number; idConductora: number; idPasajera: number }): Observable<any> {
+    return this.http.post<any>(`${this.api}/viajes`, datosViaje);
+  }
+
+  // Ruta: PUT /api/viajes/:id/finalizar
+
+  informarFinViaje(idViaje: number, datosFin?: { montoFinal?: number; metodoPago?: string }): Observable<any> {
+    return this.http.put<any>(`${this.api}/viajes/${idViaje}/finalizar`, datosFin || {});
+  }
+
+  // Ruta: GET /api/operadora/solicitudes
+
+  listarSolicitudesPendientes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/operadora/solicitudes`);
   }
 }

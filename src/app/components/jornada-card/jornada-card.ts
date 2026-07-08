@@ -30,35 +30,43 @@ export class JornadaCard implements OnInit {
   }
 
   iniciarJornada() {
-    console.log("Obteniendo ubicación del navegador...");
-
-    if (!navigator.geolocation) {
-      alert("Tu navegador no soporta geolocalización.");
-      return;
+  console.log("Obteniendo ubicación del navegador...");
+  if (!navigator.geolocation) {
+    alert("Tu navegador no soporta geolocalización.");
+    return;
     }
-
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      this.geocodingService.obtenerUbicacion(lat, lng).subscribe({
+        next: (ubicacion) => {
+          console.log("Ubicación obtenida:", ubicacion);
+          const datos = {
+            idConductora: this.conductoraInfo.idUsuario,
+            zonaActual: ubicacion.zona
+          };
+          this.enviarAlBackend(datos);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Error obteniendo ubicación", err);
+          this.enviarAlBackend({
+            idConductora: this.conductoraInfo.idUsuario,
+            zonaActual: "Centro"
+          });
+        }
+      });
+    },
 
-        this.geocodingService.obtenerNombreZona(lat, lng).subscribe({
-          next: (direccionEspecifica) => {
-            const datos = {
-              idConductora: this.conductoraInfo.idUsuario,
-              zonaActual: direccionEspecifica 
-            };
-
-            this.enviarAlBackend(datos);
-            this.cdr.detectChanges();
-          }
-        });
-      },
-      (error) => {
-        console.error("Permiso de ubicación denegado", error);
-        this.enviarAlBackend({ idConductora: this.conductoraInfo.idUsuario, zonaActual: "Ubicación no permitida" });
-      }
-    );
+    (error) => {
+      console.error("Permiso de ubicación denegado", error);
+      this.enviarAlBackend({
+        idConductora: this.conductoraInfo.idUsuario,
+        zonaActual: "Centro"
+      });
+    }
+  );
   }
 
   private enviarAlBackend(datos: any) {
