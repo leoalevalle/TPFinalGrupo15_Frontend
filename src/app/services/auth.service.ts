@@ -19,9 +19,9 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/register`, userData);
   }
 
-  // Registro de Conductora (incluye datos de vehículo)
+  // Registro de Conductora (Cambiamos la URL para que entre por /auth)
   registerConductora(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/conductoras/register`, data);
+    return this.http.post(`${this.apiUrl}/auth/register-conductora`, data);
   }
 
   guardarSesion(response: any): void {

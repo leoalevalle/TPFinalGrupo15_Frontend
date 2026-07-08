@@ -96,6 +96,19 @@ export class LoginModal {
   registrarse() {
     if (this.registerForm.invalid) return;
 
+    // 🛑 VALIDACIÓN DE FILTRO DE GÉNERO
+    const sexoSeleccionado = this.registerForm.get('sexo')?.value;
+    if (sexoSeleccionado !== 'F') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Acceso Restringido',
+        text: 'La aplicación TaxiFem es de uso exclusivo para mujeres. Por favor, te invitamos a utilizar otro medio de transporte urbano.',
+        confirmButtonColor: '#9c27b0', // Un color violeta/rosa a tono con la app
+        confirmButtonText: 'Entendido'
+      });
+      return; // Frena el envío al backend
+    }
+
     const nuevaPasajera = {
       ...this.registerForm.value,
       rol: 1,
@@ -107,15 +120,16 @@ export class LoginModal {
         Swal.fire({
           icon: 'success',
           title: 'Registro exitoso',
+          text: '¡Bienvenida a la comunidad de TaxiFem!',
         });
-
         this.activeTab = 'login';
         this.registerForm.reset();
       },
-      error: () => {
+      error: (err: any) => {
         Swal.fire({
           icon: 'error',
           title: 'Error al registrarse',
+          text: err.error?.msg || 'Ocurrió un problema técnico.',
         });
       },
     });
@@ -123,22 +137,35 @@ export class LoginModal {
 
   registrarConductora() {
     if (this.conductoraForm.invalid) return;
+
+    // 🛑 VALIDACIÓN DE FILTRO DE GÉNERO
+    const sexoSeleccionado = this.conductoraForm.get('sexo')?.value;
+    if (sexoSeleccionado !== 'F') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Acceso Restringido',
+        text: 'La plataforma TaxiFem admite únicamente a conductoras mujeres para garantizar la seguridad del servicio. Te invitamos a postularte en otras plataformas de transporte.',
+        confirmButtonColor: '#9c27b0',
+        confirmButtonText: 'Entendido'
+      });
+      return; // Frena el envío al backend
+    }
+
     this.authService.registerConductora(this.conductoraForm.value).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
           title: 'Solicitud enviada',
-          text: 'Tu solicitud será revisada por una administradora.',
+          text: 'Tu solicitud técnica y la del vehículo serán revisadas por una administradora.',
         });
         this.activeTab = 'login';
         this.conductoraForm.reset();
       },
-
-      error: () => {
+      error: (err: any) => {
         Swal.fire({
-          icon: 'info',
-          title: 'Backend pendiente',
-          text: 'La interfaz ya está lista. Falta implementar el endpoint de registro de conductoras.',
+          icon: 'error',
+          title: 'Error al enviar solicitud',
+          text: err.error?.msg || 'Verifique los datos ingresados.',
         });
       },
     });
