@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -49,12 +49,14 @@ export class Operadora implements OnInit {
   constructor(
     private authService: AuthService,
     private operadoraService: OperadoraService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.usuario = this.authService.getUser();
     this.cargarEstadoLocal();
     this.cargarPendientes(this.usuario.idUsuario);
+    this.cdr.detectChanges();
   }
 
   // ================== NAVEGACIÓN DE TABS ==================
@@ -99,6 +101,7 @@ export class Operadora implements OnInit {
       next: (data: Solicitud[]) => {
         this.solicitudesPendientes = data;
         this.cargandoPendientes = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.cargandoPendientes = false;
@@ -122,6 +125,7 @@ export class Operadora implements OnInit {
       next: (data: Usuario[]) => {
         this.conductorasEncontradas = data;
         this.buscandoConductoras = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.buscandoConductoras = false;
@@ -153,6 +157,7 @@ export class Operadora implements OnInit {
           this.solicitudExpandidaId = null;
           this.conductorasEncontradas = [];
           this.cambiarTab('propuestas');
+          this.cdr.detectChanges();
         },
         error: (err) => {
           Swal.fire('Error', err.error?.error || 'No se pudo enviar la propuesta.', 'error');
@@ -202,6 +207,7 @@ export class Operadora implements OnInit {
           this.guardarViajes();
 
           this.cambiarTab('viajes');
+          this.cdr.detectChanges();
         },
         error: (err) => {
           Swal.fire(
@@ -227,6 +233,7 @@ export class Operadora implements OnInit {
         (p) => p.solicitud.idSolicitud !== propuesta.solicitud.idSolicitud,
       );
       this.guardarPropuestas();
+      this.cdr.detectChanges();
     });
   }
 
@@ -251,6 +258,7 @@ export class Operadora implements OnInit {
 
           this.viajesEnCurso = this.viajesEnCurso.filter((v) => v.idViaje !== viaje.idViaje);
           this.guardarViajes();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           Swal.fire('Error', err.error?.error || 'No se pudo finalizar el viaje.', 'error');
