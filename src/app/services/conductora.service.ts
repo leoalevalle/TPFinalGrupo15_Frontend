@@ -80,6 +80,10 @@ export class ConductoraService {
     return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/finalizar`, {});
   }
 
+  cancelarViaje(idViaje: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/cancelar`, {});
+  }
+
   obtenerResumenDiario(): Observable<any> {
     return this.http.get<any>(`${this.api}/transaccion/conductoras/resumen`);
   }

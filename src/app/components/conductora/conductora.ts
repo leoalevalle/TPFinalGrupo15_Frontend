@@ -56,6 +56,9 @@ export class Conductora implements OnInit, OnDestroy {
   }
 
   consultarPanelEnVivo() {
+    if (this.viajeActivo && this.viajeActivo.estadoViaje === 'Cancelado en Ruta') {
+    return; 
+    }
     this.conductoraService.obtenerViajeActivo().subscribe({
       next: (viaje) => {
         if (viaje) {
@@ -153,6 +156,22 @@ export class Conductora implements OnInit, OnDestroy {
     });
   }
 
+  cancelarViaje() {
+    if (!this.viajeActivo) return;
+    this.conductoraService.cancelarViaje(this.viajeActivo.idViaje).subscribe({
+      next: (res) => {
+        this.monto = res.viaje.monto;
+        this.viajeActivo.estadoViaje = 'Cancelado en Ruta';
+        this.zone.run(() => {
+          this.obtenerGananciasDelDia();
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err) => alert(err.error.error)
+    });
+  }
+
   obtenerGananciasDelDia() {
     this.conductoraService.obtenerResumenDiario().subscribe({ 
       next: (res) => {
@@ -161,5 +180,15 @@ export class Conductora implements OnInit, OnDestroy {
       },
       error: (err) => console.error('Error al obtener resumen:', err)
     });
+  }
+
+  refrescar(){
+    this.viajeActivo = null; 
+    this.propuesta = null;
+    this.zone.run(() => {
+          this.obtenerGananciasDelDia();
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        });
   }
 }
