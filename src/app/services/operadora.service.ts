@@ -26,6 +26,12 @@ export class OperadoraService {
     });
   }
 
+  listarSolicitudesAceptadas(): Observable<any> {
+    return this.http.get(`${this.api}/operadora/solicitudes-aceptadas`, {
+      headers: this.headers(),
+    });
+  }
+
   conductorasDisponibles(zona: string): Observable<any> {
     return this.http.get(`${this.api}/operadora/conductoras-zona`, {
       headers: this.headers(),

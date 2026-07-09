@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ConductoraService } from '../../services/conductora';
+import { ConductoraService } from '../../services/conductora.service';
 import { AuthService } from '../../services/auth.service';
 import { GeocodingService } from '../../services/geocoding.service';
 
