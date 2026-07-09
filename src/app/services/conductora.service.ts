@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Vehiculo } from '../models/vehiculo';
+import { Vehiculo } from '../models/vehiculo'; 
 
 @Injectable({
   providedIn: 'root',
@@ -9,28 +9,27 @@ import { Vehiculo } from '../models/vehiculo';
 export class ConductoraService {
 
   private api="http://localhost:3000/api";
-  
-  constructor(private http:HttpClient){}
+  constructor(private http:HttpClient){} 
       
   iniciarJornada(data:any){
       return this.http.put(
            `${this.api}/conductoras/jornada/inicio`,
           data
       );
-  }
+  } 
 
   finalizarJornada(data:any){
       return this.http.put(
          this.api+"/conductoras/jornada/fin",
          data
       );
-  }
+  } 
 
   obtenerConductora(id: number) {
       return this.http.get<any>(
         `${this.api}/conductoras/${id}`
       );
-  }
+  } 
 
   obtenerVehiculo(id: number) {
       return this.http.get<any>(
@@ -43,7 +42,7 @@ export class ConductoraService {
          'http://localhost:3000/api/conductoras/cambio-vehiculo',
          data
       );
-  }
+  } 
 
   listarConductoras(){
       return this.http.get(
@@ -55,31 +54,33 @@ export class ConductoraService {
       return this.http.get(
          'http://localhost:3000/api/admin/vehiculos'
       );
-  }
+  } 
 
   obtenerPropuesta(): Observable<any> {
     return this.http.get<any>(`${this.api}/transaccion/conductoras/solicitudes/propuesta`);
   }
 
+  obtenerViajeActivo(): Observable<any> {
+    return this.http.get<any>(`${this.api}/transaccion/conductoras/viajes/activo`);
+  }
+
   responderPropuesta(idSolicitud: number, aceptar: boolean): Observable<any> {
-      return this.http.put<any>(`${this.api}/transaccion/conductoras/solicitudes/${idSolicitud}/responder`, { aceptar });
+    return this.http.put<any>(`${this.api}/transaccion/conductoras/solicitudes/${idSolicitud}/responder`, { aceptar });
   }
 
   llegarOrigen(idViaje: number): Observable<any> {
-    return this.http.patch(`${this.api}/transaccion/viajes/${idViaje}/llegue_origen`, {});
+    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/llegue_origen`, {});
   }
 
   iniciarViaje(idViaje: number): Observable<any> {
-    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/iniciar`,{});
+    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/inicio-viaje`, {});
   }
 
   finalizarViaje(idViaje: number): Observable<any> {
-    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/finalizar`,{});
+    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/finalizar`, {});
   }
 
   obtenerResumenDiario(): Observable<any> {
-    return this.http.get(`${this.api}/transaccion/conductoras/resumen`);
+    return this.http.get<any>(`${this.api}/transaccion/conductoras/resumen`);
   }
 }
-
-

@@ -1,23 +1,19 @@
 <div class="container py-5" *ngIf="conductora">
 
-    <h2 class="mb-4 text-center">
-        Panel de Conductora
-    </h2>
+    <h2 class="mb-4 text-center">Panel de Conductora</h2>
 
     <div class="card shadow-sm mb-4">
         <div class="card-body py-2 px-3">
             <div class="row align-items-center">
-                <div class="col-md-8 col-sm-12 d-flex align-items-center gap-3 text-center text-sm-start mb-2 mb-md-0">
-                    <span class="fs-3">
-                     logo
-                    </span>
+                <div class="col-md-4 col-sm-12 d-flex align-items-center gap-3 text-center text-sm-start mb-2 mb-md-0">
+                    <span class="fs-3">logo</span>
                     <div>
                         <h4 class="mb-0">Hola {{conductora.nombre}}</h4>
                         <p class="text-muted mb-1 small">📧 {{conductora.email}}</p>
                         <p class="text-muted mb-0 small">📞 {{conductora.telefono}}</p>
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-12 text-md-end text-center">
+                <div class="col-md-8 col-sm-12 text-md-end text-center">
                     <app-jornada-card [conductoraInfo]="conductora"></app-jornada-card>
                 </div>
             </div>
@@ -26,7 +22,7 @@
 
     <div class="mb-4">
         
-        <div class="card border shadow-sm bg-light animate__animated animate__bounceIn" *ngIf="propuesta && !viajeActivo">
+        <div class="card border shadow-sm bg-light animate__animated animate__bounceIn" *ngIf="propuesta && propuesta.estado === 'Propuesta' && !viajeActivo">
             <div class="card-header text-dark d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Nueva Propuesta de Viaje Recibida</h4>
                 <span class="badge bg-dark">Pendiente de Respuesta</span>
@@ -43,12 +39,32 @@
                     </div>
                 </div>
                 <div class="d-flex gap-3 mt-3">
-                    <button class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="responder(true)">
-                        Aceptar Viaje
-                    </button>
-                    <button class="btn btn-danger flex-grow-1 py-2 fw-bold" (click)="responder(false)">
-                        Rechazar
-                    </button>
+                    <button class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="responder(true)">Aceptar Viaje</button>
+                    <button class="btn btn-danger flex-grow-1 py-2 fw-bold" (click)="responder(false)">Rechazar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border border-warning shadow-sm bg-light animate__animated animate__fadeIn" *ngIf="propuesta && propuesta.estado === 'Aceptada' && !viajeActivo">
+            <div class="card-header text-dark d-flex justify-content-between align-items-center bg-white border-bottom">
+                <h4 class="mb-0 text-success fw-bold">Propuesta de Viaje Aceptada</h4>
+                <span class="badge bg-success text-white">Aceptada</span>
+            </div>
+            <div class="card-body">
+                <div class="row text-muted">
+                    <div class="col-md-6">
+                        <p><strong>Origen:</strong> {{propuesta.origen}}</p>
+                        <p><strong>Destino:</strong> {{propuesta.destino}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Zona:</strong> {{propuesta.zona}}</p>
+                        <p><strong>Pasajeras:</strong> {{propuesta.cantPasajeros}}</p>
+                    </div>
+                </div>
+                <hr class="my-2">
+                <div class="alert alert-warning text-center fw-bold mb-0 shadow-sm py-3">
+                    <span class="spinner-border spinner-border-sm me-2 text-warning" role="status"></span>
+                    Esperando que la operadora verifique y autorice el despacho del viaje...
                 </div>
             </div>
         </div>
@@ -69,17 +85,10 @@
                         <p><strong>ID de Viaje:</strong> #{{ viajeActivo.idViaje }}</p>
                     </div>
                 </div>
-
                 <div class="d-flex gap-3 mt-3">
-                    <button *ngIf="viajeActivo.estadoViaje === 'En Camino'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="llegueAlOrigen()">
-                        Llegué al Origen
-                    </button>
-                    <button *ngIf="viajeActivo.estadoViaje === 'En Origen'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="iniciarTraslado()">
-                        Iniciar Viaje
-                    </button>
-                    <button *ngIf="viajeActivo.estadoViaje === 'En Viaje'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="finalizarViaje()">
-                        Finalizar Servicio
-                    </button>
+                    <button *ngIf="viajeActivo.estadoViaje === 'En Camino' || viajeActivo.estadoViaje === 'Asignado'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="llegueAlOrigen()">Llegué al Origen</button>
+                    <button *ngIf="viajeActivo.estadoViaje === 'En Origen'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="iniciarTraslado()">Iniciar Viaje</button>
+                    <button *ngIf="viajeActivo.estadoViaje === 'En Viaje'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="finalizarViaje()">Finalizar Servicio</button>
                 </div>
             </div>
         </div>
@@ -90,34 +99,20 @@
             <small>Esperando nuevas asignaciones desde el Panel de Control...</small>
         </div>
 
+        <div class="card shadow-sm bg-success text-center py-4 text-white border" *ngIf="monto > 0">
+            <p class="mb-0 fw-bold">Monto TOTAL: ${{monto}}</p>
+            <small>Monto Total del viaje recién finalizado...</small>
+        </div>
+
     </div>
 
     <div class="nav nav-pills nav-justified mb-4 p-1 bg-light rounded shadow-sm border" role="tablist">
-        <button class="nav-link fw-bold py-2" 
-                [class.active]="pestanaActiva === 'vehiculo'"
-                [style.background-color]="pestanaActiva === 'vehiculo' ? '#ff5fa2' : ''"
-                [style.color]="pestanaActiva === 'vehiculo' ? '#ffffff' : '#495057'"
-                (click)="pestanaActiva = 'vehiculo'">
-            Vehículo
-        </button>
-        <button class="nav-link fw-bold py-2 " 
-                [class.active]="pestanaActiva === 'cambio'"
-                [style.background-color]="pestanaActiva === 'cambio' ? '#ff5fa2' : ''"
-                [style.color]="pestanaActiva === 'cambio' ? '#ffffff' : '#495057'"
-                (click)="pestanaActiva = 'cambio'">
-            Cambio de Vehículo
-        </button>
-        <button class="nav-link fw-bold py-2" 
-                [class.active]="pestanaActiva === 'resumen'"
-                [style.background-color]="pestanaActiva === 'resumen' ? '#ff5fa2' : ''"
-                [style.color]="pestanaActiva === 'resumen' ? '#ffffff' : '#495057'"
-                (click)="pestanaActiva = 'resumen'; obtenerGananciasDelDia()">
-            Resumen Diario
-        </button>
+        <button class="nav-link fw-bold py-2" [class.active]="pestanaActiva === 'vehiculo'" [style.background-color]="pestanaActiva === 'vehiculo' ? '#ff5fa2' : ''" [style.color]="pestanaActiva === 'vehiculo' ? '#ffffff' : '#495057'" (click)="pestanaActiva = 'vehiculo'">Vehículo</button>
+        <button class="nav-link fw-bold py-2" [class.active]="pestanaActiva === 'cambio'" [style.background-color]="pestanaActiva === 'cambio' ? '#ff5fa2' : ''" [style.color]="pestanaActiva === 'cambio' ? '#ffffff' : '#495057'" (click)="pestanaActiva = 'cambio'">Cambio de Vehículo</button>
+        <button class="nav-link fw-bold py-2" [class.active]="pestanaActiva === 'resumen'" [style.background-color]="pestanaActiva === 'resumen' ? '#ff5fa2' : ''" [style.color]="pestanaActiva === 'resumen' ? '#ffffff' : '#495057'" (click)="pestanaActiva = 'resumen'; obtenerGananciasDelDia()">Resumen Diario</button>
     </div>
 
     <div class="tab-content">
-        
         <div class="tab-pane fade show active" *ngIf="pestanaActiva === 'vehiculo'">
             <app-vehiculo-card [conductoraInfo]="conductora"></app-vehiculo-card>
         </div>
@@ -128,8 +123,8 @@
 
         <div class="tab-pane fade show active" *ngIf="pestanaActiva === 'resumen'">
             <div class="card shadow-sm animate__animated animate__fadeIn bg-light">
-                <div class="card-header  text-dark d-flex justify-content-between align-items-center py-2">
-                    <h5 class="mb-0 fw-bold">Resumen de Diario</h5>
+                <div class="card-header text-dark d-flex justify-content-between align-items-center py-2">
+                    <h5 class="mb-0 fw-bold">Resumen Diario</h5>
                     <span class="badge bg-dark text-white fw-bold">{{ resumenDiario?.fecha || 'Hoy' }}</span>
                 </div>
                 <div class="card-body bg-white">
@@ -143,26 +138,26 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col" class="text-start">Origen</th>
-                                        <th scope="col" class="text-start">Destino</th>
+                                        <th scope="col" class="text-center">Hora Inicio</th>
+                                        <th scope="col" class="text-center">Hora Fin</th>
                                         <th scope="col" class="text-end px-4">Monto</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let viaje of resumenDiario.listaViajes; let i = index">
+                                    <tr *ngFor="let viaje of (resumenDiario.listaViajes || resumenDiario.viajes); let i = index">
                                         <th scope="row" class="fw-bold text-muted">{{ i + 1 }}</th>
-                                        <td class="text-start">{{ viaje.origen || 'Zona Comercial' }}</td>
-                                        <td class="text-start">{{ viaje.destino }}</td>
+                                        <td class="text-center">{{ (viaje.horarioInicio || viaje.horario_inicio) | date:'HH:mm' }} hs</td>
+                                        <td class="text-center">{{ (viaje.horarioFin || viaje.horario_fin) | date:'HH:mm' }} hs</td>
                                         <td class="text-end fw-bold text-success px-4">${{ viaje.monto }}</td>
                                     </tr>
-                                    <tr *ngIf="resumenDiario.viajesRealizados === 0">
+                                    <tr *ngIf="(!resumenDiario.listaViajes || resumenDiario.listaViajes.length === 0) && (!resumenDiario.viajes || resumenDiario.viajes.length === 0)">
                                         <td colspan="4" class="text-center text-muted py-4 fs-6">No has realizado viajes finalizados todavía en la jornada actual.</td>
                                     </tr>
                                 </tbody>
                                 <tfoot class="table-group-divider fw-bold" *ngIf="resumenDiario.viajesRealizados > 0">
                                     <tr class="table-light align-middle">
                                         <td colspan="3" class="text-end text-uppercase text-dark fw-bold py-3">Total Neto Recaudado:</td>
-                                        <td class="text-end text-success fs-5 fw-bold px-4">${{ resumenDiario.totalGanado}}</td>
+                                        <td class="text-end text-success fs-5 fw-bold px-4">${{ resumenDiario.totalGanado }}</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -175,9 +170,7 @@
                 </div>
             </div>
         </div>
-
     </div>
-
 </div>
 
 <div *ngIf="!conductora" class="text-center py-5">

@@ -20,8 +20,14 @@ export class OperadoraService {
     });
   }
 
-  listarSolicitudesPendientes(userId: number): Observable<any> {
+  listarSolicitudesPendientes(): Observable<any> {
     return this.http.get(`${this.api}/operadora/solicitudes`, {
+      headers: this.headers(),
+    });
+  }
+
+  listarSolicitudesAceptadas(): Observable<any> {
+    return this.http.get(`${this.api}/operadora/solicitudes-aceptadas`, {
       headers: this.headers(),
     });
   }
