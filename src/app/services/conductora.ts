@@ -56,6 +56,14 @@ export class ConductoraService {
       );
     }
 
+    obtenerPropuesta(): Observable<any> {
+    return this.http.get<any>(`${this.api}/transaccion/conductoras/solicitudes/propuesta`);
+  }
+
+  responderPropuesta(idSolicitud: number, aceptar: boolean): Observable<any> {
+    return this.http.put<any>(`${this.api}/transaccion/conductoras/solicitudes/${idSolicitud}/responder`, { aceptar });
+  }
+
 }
 
 

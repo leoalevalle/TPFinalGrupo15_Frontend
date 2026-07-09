@@ -97,7 +97,7 @@ export class Operadora implements OnInit {
   // ================== PENDIENTES ==================
   cargarPendientes(userId: number) {
     this.cargandoPendientes = true;
-    this.operadoraService.listarSolicitudesPendientes(userId).subscribe({
+    this.operadoraService.listarSolicitudesPendientes().subscribe({
       next: (data: Solicitud[]) => {
         this.solicitudesPendientes = data;
         this.cargandoPendientes = false;
@@ -131,6 +131,7 @@ export class Operadora implements OnInit {
         this.buscandoConductoras = false;
         Swal.fire('Error', 'No se pudieron buscar conductoras.', 'error');
         console.error(err);
+        this.cdr.detectChanges();
       },
     });
   }
