@@ -69,7 +69,7 @@ export class Admin implements OnInit {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, confirmar'
-    }).then((result) => {
+    }).then((result: any) => {
       if (result.isConfirmed) {
         this.adminService.cambiarEstadoLogicoUsuario(idUsuario, !estadoActual).subscribe({
           next: () => {
@@ -90,7 +90,7 @@ export class Admin implements OnInit {
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Confirmar'
-    }).then((result) => {
+    }).then((result: any) => {
       if (result.isConfirmed) {
         const datos = {
           aprobado: aprobar,
