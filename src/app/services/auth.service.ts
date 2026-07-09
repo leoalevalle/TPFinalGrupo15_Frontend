@@ -14,6 +14,11 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/login`, credentials);
   }
 
+  // Login con Google
+  loginGoogle(data:any){
+    return this.http.post(`${this.apiUrl}/auth/login-google`, data);
+  }
+
   // Registro de Pasajera
   register(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/register`, userData);
