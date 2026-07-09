@@ -4,7 +4,7 @@ import { JornadaCard } from '../jornada-card/jornada-card';
 import { VehiculoCard } from '../vehiculo-card/vehiculo-card';
 import { CambioVehiculoModal } from '../cambio-vehiculo-modal/cambio-vehiculo-modal';
 import { AuthService } from '../../services/auth.service';
-import { ConductoraService } from '../../services/conductora';
+import { ConductoraService } from '../../services/conductora.service';
 
 @Component({
   selector: 'app-conductora',
@@ -17,6 +17,10 @@ export class Conductora {
 
   conductora:any;
   propuesta: any=null;
+  viajeActivo: any = null;
+  resumenDiario: any = null;
+  pestanaActiva: string = 'vehiculo';
+
   constructor(
     private authService: AuthService, 
     private conductoraService: ConductoraService, 
@@ -42,9 +46,7 @@ export class Conductora {
     this.conductoraService.obtenerPropuesta().subscribe(res => {
       console.log("Propuesta detectada en componente:", res);
 
-      // Flexibilizamos la condición: si 'res' existe y tiene CUALQUIER propiedad de id, lo guardamos
       if (res && (res.idSolicitud || res.id || res.origen)) {
-        // Clonamos el objeto usando el operador spread (...) para forzar a Angular a romper la referencia
         this.propuesta = { ...res }; 
         console.log("Variable 'this.propuesta' asignada con éxito:", this.propuesta);
       } else {
@@ -52,22 +54,65 @@ export class Conductora {
         console.log("No se detectó una propuesta válida, seteado en null.");
       }
       
-      // Forzamos manualmente el renderizado del *ngIf="propuesta"
       this.cdr.detectChanges();
     }, error => {
       console.error("Error obteniendo propuesta:", error);
     });
   }
-  // 🔥 NUEVO: Envía la decisión a la API y limpia la pantalla
+
   responder(aceptar: boolean) {
     if (!this.propuesta) return;
 
     this.conductoraService.responderPropuesta(this.propuesta.idSolicitud, aceptar).subscribe(res => {
-      alert(aceptar ? "¡Viaje aceptado! Dirígete al origen." : "Propuesta rechazada con éxito.");
-      this.propuesta = null; // Limpiamos la propuesta de la pantalla
+      this.propuesta = null; 
       this.cdr.detectChanges();
     }, error => {
       alert("Error al responder la propuesta: " + error.error.error);
+    });
+  }
+
+  llegueAlOrigen() {
+    if (!this.viajeActivo) return;
+    this.conductoraService.llegarOrigen(this.viajeActivo.idViaje).subscribe({
+      next: (res) => {
+        this.viajeActivo.estadoViaje = 'En Origen';
+        this.cdr.detectChanges();
+      },
+      error: (err) => alert(err.error.error)
+    });
+  }
+
+  iniciarTraslado() {
+    if (!this.viajeActivo) return;
+    this.conductoraService.iniciarViaje(this.viajeActivo.idViaje).subscribe({
+      next: (res) => {
+        this.viajeActivo.estadoViaje = 'En Viaje';
+        this.cdr.detectChanges();
+      },
+      error: (err) => alert(err.error.error)
+    });
+  }
+
+  finalizarViaje() {
+    if (!this.viajeActivo) return;
+    this.conductoraService.finalizarViaje(this.viajeActivo.idViaje).subscribe({
+      next: (res) => {
+        alert(`Viaje Finalizado. Monto a cobrar: $${res.viaje.monto}`);
+        this.viajeActivo = null;
+        this.obtenerGananciasDelDia();
+        this.cdr.detectChanges();
+      },
+      error: (err) => alert(err.error.error)
+    });
+  }
+
+  obtenerGananciasDelDia() {
+    this.conductoraService.obtenerResumenDiario().subscribe({
+      next: (res) => {
+        this.resumenDiario = res;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error al obtener resumen:', err)
     });
   }
 }

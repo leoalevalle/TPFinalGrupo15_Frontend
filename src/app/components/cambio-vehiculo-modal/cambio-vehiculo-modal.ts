@@ -2,7 +2,7 @@ import { Component, OnInit, Input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { ConductoraService } from '../../services/conductora';
+import { ConductoraService } from '../../services/conductora.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({

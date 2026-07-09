@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
-import { ConductoraService } from '../../services/conductora';
+import { ConductoraService } from '../../services/conductora.service';
 
 
 @Component({
