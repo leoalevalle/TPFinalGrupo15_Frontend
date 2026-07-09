@@ -86,7 +86,18 @@
                     </div>
                 </div>
                 <div class="d-flex gap-3 mt-3">
-                    <button *ngIf="viajeActivo.estadoViaje === 'En Camino' || viajeActivo.estadoViaje === 'Asignado'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="llegueAlOrigen()">Llegué al Origen</button>
+                    <button class="btn btn-danger flex-grow-1 py-2 fw-bold" 
+                            (click)="cancelarViaje()" [disabled]="viajeActivo.estadoViaje === 'Cancelado en Ruta'">
+                        Cancelar Viaje
+                    </button>
+
+                    <button *ngIf="viajeActivo.estadoViaje === 'Cancelado en Ruta'" 
+                            class="btn btn-success flex-grow-1 py-2 fw-bold" 
+                            (click)="refrescar()">
+                        Aceptar
+                    </button>
+
+                    <button *ngIf="viajeActivo.estadoViaje === 'En Camino'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="llegueAlOrigen()">Llegué al Origen</button>
                     <button *ngIf="viajeActivo.estadoViaje === 'En Origen'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="iniciarTraslado()">Iniciar Viaje</button>
                     <button *ngIf="viajeActivo.estadoViaje === 'En Viaje'" class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="finalizarViaje()">Finalizar Servicio</button>
                 </div>
