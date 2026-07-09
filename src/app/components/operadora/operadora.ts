@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -49,6 +49,7 @@ export class Operadora implements OnInit {
   constructor(
     private authService: AuthService,
     private operadoraService: OperadoraService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -95,7 +96,7 @@ export class Operadora implements OnInit {
   // ================== PENDIENTES ==================
   cargarPendientes(userId: number) {
     this.cargandoPendientes = true;
-    this.operadoraService.listarSolicitudesPendientes(userId).subscribe({
+    this.operadoraService.listarSolicitudesPendientes().subscribe({
       next: (data: Solicitud[]) => {
         this.solicitudesPendientes = data;
         this.cargandoPendientes = false;
@@ -122,11 +123,13 @@ export class Operadora implements OnInit {
       next: (data: Usuario[]) => {
         this.conductorasEncontradas = data;
         this.buscandoConductoras = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.buscandoConductoras = false;
         Swal.fire('Error', 'No se pudieron buscar conductoras.', 'error');
         console.error(err);
+        this.cdr.detectChanges();
       },
     });
   }

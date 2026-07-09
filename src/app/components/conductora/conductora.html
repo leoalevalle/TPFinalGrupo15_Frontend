@@ -4,22 +4,48 @@
         Panel de Conductora
     </h2>
 
+    <div class="card border-warning shadow-sm mb-4 bg-light" *ngIf="propuesta">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">🚨 ¡Nueva Propuesta de Viaje Recibida!</h4>
+            <span class="badge bg-dark">Pendiente de Respuesta</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>📍 Origen:</strong> {{propuesta.origen}}</p>
+                    <p><strong>🏁 Destino:</strong> {{propuesta.destino}}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>🗺️ Zona:</strong> {{propuesta.zona}}</p>
+                    <p><strong>👥 Pasajeras:</strong> {{propuesta.cantPasajeros}}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-3 mt-3">
+                <button class="btn btn-success flex-grow-1 py-2 fw-bold" (click)="responder(true)">
+                    ✅ Aceptar Viaje
+                </button>
+                <button class="btn btn-danger flex-grow-1 py-2 fw-bold" (click)="responder(false)">
+                    ❌ Rechazar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h3>Hola {{conductora.nombre}}</h3>
-            <p>{{conductora.email}}</p>
-            <p>{{conductora.telefono}}</p>
+            <p class="text-muted mb-1">📧 {{conductora.email}}</p>
+            <p class="text-muted mb-0">📞 {{conductora.telefono}}</p>
         </div>
     </div>
 
     <app-jornada-card [conductoraInfo]="conductora"></app-jornada-card>
-
     <app-vehiculo-card [conductoraInfo]="conductora"></app-vehiculo-card>
-
     <app-cambio-vehiculo-modal [conductoraInfo]="conductora"></app-cambio-vehiculo-modal>
 
 </div>
 
 <div *ngIf="!conductora" class="text-center py-5">
+    <div class="spinner-border text-primary mb-2" role="status"></div>
     <p>Cargando datos del panel...</p>
 </div>

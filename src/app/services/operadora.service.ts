@@ -7,11 +7,11 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class OperadoraService {
-  private api = 'http://localhost:3000/api';
+  private api = 'http://localhost:3000/api/transaccion';
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService,
+    private authService: AuthService
   ) {}
 
   private headers(): HttpHeaders {
@@ -20,8 +20,8 @@ export class OperadoraService {
     });
   }
 
-  listarSolicitudesPendientes(userId: number): Observable<any> {
-    return this.http.get(`${this.api}/operadora/${userId}/solicitudes`, {
+  listarSolicitudesPendientes(): Observable<any> {
+    return this.http.get(`${this.api}/operadora/solicitudes`, {
       headers: this.headers(),
     });
   }
