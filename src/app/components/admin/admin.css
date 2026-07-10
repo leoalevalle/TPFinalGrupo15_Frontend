@@ -1,0 +1,16 @@
+/* Pone la fila con un fondo rojo/rosa muy sutil y aclara las letras */
+.fila-rechazada {
+  background-color: #f8d7da4a !important;
+  color: #6c757d !important;
+}
+
+/* Tacha el nombre en rojo */
+.texto-tachado {
+  text-decoration: line-through;
+  color: #dc3545;
+}
+
+/* Opcional: una fila activa se pone verde clarito un instante */
+.fila-activa {
+  background-color: #d4edda42 !important;
+}

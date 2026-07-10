@@ -24,9 +24,14 @@ export class AdministracionService {
     return this.http.put<any>(`${this.api}/pasajeras/${idPasajera}/evaluar`, datosEvaluacion);
   }
 
-  // Ruta: PUT /api/conductoras/:id/evaluar
-  evaluarRegistroConductora(idConductora: number, datosEvaluacion: { aprobado: boolean; observaciones?: string }): Observable<any> {
-    return this.http.put<any>(`${this.api}/conductoras/${idConductora}/evaluar`, datosEvaluacion);
+  // Obtener las conductoras que están esperando aprobación 
+  getSolicitudesAlta(): Observable<any> {
+    return this.http.get<any>(`${this.api}/admin/solicitudes-alta`);
+  }
+
+  evaluarRegistroConductora(idConductora: number, aprobar: boolean): Observable<any> {
+    // Mandamos el objeto con la propiedad "aprobar" tal como la pide el controlador
+    return this.http.put<any>(`${this.api}/admin/conductoras/${idConductora}/evaluar`, { aprobar });
   }
 
   // =========================================================================

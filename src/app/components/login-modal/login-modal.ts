@@ -105,7 +105,7 @@ export class LoginModal implements OnInit {
         icon: 'warning',
         title: 'Acceso Restringido',
         text: 'La aplicación TaxiFem es de uso exclusivo para mujeres. Por favor, te invitamos a utilizar otro medio de transporte urbano.',
-        confirmButtonColor: '#9c27b0', // Un color violeta/rosa a tono con la app
+        confirmButtonColor: '#9c27b0', 
         confirmButtonText: 'Entendido'
       });
       return; // Frena el envío al backend

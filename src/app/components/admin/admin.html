@@ -148,27 +148,61 @@
     </div>
   </div>
 
-  <div class="card shadow-sm border-warning">
-    <div class="card-header bg-warning text-dark fw-bold">
-      <i class="fa-solid fa-hammer"></i> Auditoría de Registros Pendientes (Accesos Directos rápidos de Prueba)
+  <div class="container mt-5">
+  <div class="card shadow">
+    <div class="card-header bg-dark text-white">
+      <h3 class="mb-0">Panel de Control - Gestión de Conductoras</h3>
     </div>
     <div class="card-body">
-      <p class="small text-muted">Como las listas completas de pasajeras/conductoras dependen de sus respectivas tablas, usa estos botones rápidos para forzar llamadas de prueba a los endpoints con identificadores de ejemplo (ID: 1):</p>
-      <div class="d-flex flex-wrap gap-2">
-        <button class="btn btn-sm btn-outline-dark" (click)="alterarEstadoUsuario(1, true)">
-          <i class="fa-solid fa-user-slash"></i> Banear Usuario #1
-        </button>
-        <button class="btn btn-sm btn-outline-dark" (click)="evaluarPasajera(1, true)">
-          <i class="fa-solid fa-user-check"></i> Aprobar Pasajera #1
-        </button>
-        <button class="btn btn-sm btn-outline-dark" (click)="evaluarConductora(1, true)">
-          <i class="fa-solid fa-id-card"></i> Habilitar Conductora #1
-        </button>
-        <button class="btn btn-sm btn-outline-dark" (click)="aprobarCambioCocheChofer(10, true)">
-          <i class="fa-solid fa-code-pull-request"></i> Aprobar Solicitud de Coche #10
-        </button>
-      </div>
+
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let cond of solicitudesPendientes" 
+              [ngClass]="{'table-danger text-decoration-line-through': !cond.activo && cond.aprobadaPorAdmin}">
+              <td>
+                <span [ngClass]="{'texto-tachado': cond.rechazada}">
+                  <strong>{{ cond.nombre }}</strong>
+                </span>
+              </td>
+              <td>{{ cond.email }}</td>
+              
+              <!-- Columna de Estado Visual -->
+              <td>
+                <span class="badge bg-success" *ngIf="cond.activo">Activa / Habilitada</span>
+                <span class="badge bg-danger" *ngIf="cond.aprobadaPorAdmin && !cond.activo">Rechazada</span>
+                <span class="badge bg-warning text-dark" *ngIf="!cond.activo && !cond.aprobadaPorAdmin">Pendiente</span>
+              </td>
+
+              <!-- Columna de Botones Dinámicos -->
+              <td class="text-center">
+                <ng-container *ngIf="!cond.activo && !cond.aprobadaPorAdmin">
+                  <button class="btn btn-success btn-sm me-2" (click)="evaluarConductora(cond, true)">
+                    Habilitar Licencia
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="evaluarConductora(cond, false)">
+                    Rechazar
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="!cond.activo && cond.aprobadaPorAdmin">
+                  <button class="btn btn-outline-primary btn-sm" (click)="evaluarConductora(cond, true)">
+                    Inspeccionar o habilitar nuevamente
+                  </button>
+                </ng-container>
+              </td>
+            </tr>
+        </tbody>
+      </table>
+
     </div>
   </div>
+</div>
 
 </div>
