@@ -14,6 +14,7 @@ export class Admin implements OnInit {
   
   // Listados locales para renderizar en las tablas
   vehiculos: any[] = [];
+  solicitudesPendientes: any[] = [];
   
   // Variables para el formulario de Alta de Vehículo
   nuevoVehiculo = {
@@ -33,11 +34,25 @@ export class Admin implements OnInit {
   ngOnInit(): void {
     this.cargarVehiculos();
     this.obtenerInforme();
+    this.cargarSolicitudes();
   }
 
   // =========================================================================
   // MÉTODOS DE CONSULTA (GET)
   // =========================================================================
+  cargarSolicitudes(): void {
+    this.adminService.getSolicitudesAlta().subscribe({
+      next: (res: any) => {
+        // Imprimimos en consola para ver cómo vienen los nombres de las variables
+        console.log('Datos que trae el back para las conductoras:', res); 
+        
+        if (res && res.status === '1') {
+          this.solicitudesPendientes = res.data;
+        }
+      },
+      error: (err) => console.error('Error al cargar solicitudes de conductoras', err)
+    });
+  }
   cargarVehiculos() {
     this.adminService.listarVehiculos().subscribe({
       next: (res) => this.vehiculos = res,
@@ -105,18 +120,42 @@ export class Admin implements OnInit {
     });
   }
 
-  evaluarConductora(idConductora: number, aprobar: boolean) {
+  // =========================================================================
+  // GESTIÓN Y EVALUACIÓN DE CONDUCTORAS
+  // =========================================================================
+  evaluarConductora(conductora: any, aprobar: boolean): void {
+    const accion = aprobar ? 'habilitar' : 'rechazar';
+    
     Swal.fire({
       title: aprobar ? '¿Habilitar conductora para trabajar?' : '¿Rechazar conductora?',
+      text: aprobar 
+        ? `Esto cambiará el estado de ${conductora.nombre} a Activo y podrá loguearse.` 
+        : `Se marcará la solicitud de ${conductora.nombre} como rechazada de forma visual.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Confirmar'
+      confirmButtonColor: aprobar ? '#28a745' : '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: aprobar ? 'Sí, habilitar' : 'Sí, rechazar',
+      cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.adminService.evaluarRegistroConductora(idConductora, { aprobado: aprobar }).subscribe({
-          next: () => Swal.fire('Habilitación Actualizada', 'Cambio registrado en la ficha de la conductora.', 'success'),
-          error: (err) => Swal.fire('Error', 'Fallo en la evaluación.', 'error')
+        
+        this.adminService.evaluarRegistroConductora(conductora.idUsuario, aprobar).subscribe({
+          next: (res: any) => {
+            Swal.fire('¡Logrado!', res.msg || 'Cambio registrado con éxito.', 'success');
+            if (aprobar) {
+              conductora.activo = true;
+              conductora.aprobadaPorAdmin = true;
+            } else {
+              conductora.activo = false;
+              conductora.aprobadaPorAdmin = true;
+            }
+          },
+          error: (err) => {
+            Swal.fire('Error', err.error?.msg || 'No se pudo procesar la evaluación.', 'error');
+          }
         });
+
       }
     });
   }
