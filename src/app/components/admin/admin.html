@@ -150,11 +150,32 @@
 
   <div class="container mt-5">
   <div class="card shadow">
-    <div class="card-header bg-dark text-white">
-      <h3 class="mb-0">Panel de Control - Gestión de Conductoras</h3>
+    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+      <h3 class="mb-0"><i class="fa-solid fa-list-check"></i> Panel de Control - Gestión de Conductoras</h3>
+      <!-- Tu botón original de actualizar se queda firme acá -->
+      <button class="btn btn-sm btn-light" (click)="cargarSolicitudes()"><i class="fa-solid fa-rotate"></i> Actualizar</button>
     </div>
+    
     <div class="card-body">
 
+      <!-- 🔍 BARRA DE BÚSQUEDA (Agregada arriba de la tabla) -->
+      <div class="mb-4">
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar conductora por nombre o email..." 
+            [(ngModel)]="terminoBusqueda"
+            (input)="filtrarConductoras()"
+          />
+          <button *ngIf="terminoBusqueda" class="btn btn-outline-secondary" type="button" (click)="limpiarBusqueda()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- 📊 TABLA DE CONDUCTORAS -->
       <table class="table table-hover align-middle">
         <thead class="table-light">
           <tr>
@@ -165,24 +186,31 @@
           </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let cond of solicitudesPendientes" 
-              [ngClass]="{'table-danger text-decoration-line-through': !cond.activo && cond.aprobadaPorAdmin}">
+            <!-- 💡 IMPORTANTE: Ahora iteramos sobre 'conductorasVisibles' -->
+            <tr *ngFor="let cond of conductorasVisibles" 
+              [ngClass]="{
+                'table-danger text-decoration-line-through text-muted': !cond.activo && cond.aprobadaPorAdmin,
+                'table-success': cond.activo && cond.aprobadaPorAdmin
+              }">
               <td>
-                <span [ngClass]="{'texto-tachado': cond.rechazada}">
+                <!-- Limpiamos el cond.rechazada viejo y usamos la nueva lógica limpia -->
+                <span [ngClass]="{'text-muted': !cond.activo && cond.aprobadaPorAdmin}">
                   <strong>{{ cond.nombre }}</strong>
                 </span>
               </td>
               <td>{{ cond.email }}</td>
               
-              <!-- Columna de Estado Visual -->
+              <!-- Columna de Estado Visual (Actualizada) -->
               <td>
-                <span class="badge bg-success" *ngIf="cond.activo">Activa / Habilitada</span>
-                <span class="badge bg-danger" *ngIf="cond.aprobadaPorAdmin && !cond.activo">Rechazada</span>
+                <span class="badge bg-success" *ngIf="cond.activo && cond.aprobadaPorAdmin">Activa / Habilitada</span>
+                <span class="badge bg-danger" *ngIf="!cond.activo && cond.aprobadaPorAdmin">Rechazada</span>
                 <span class="badge bg-warning text-dark" *ngIf="!cond.activo && !cond.aprobadaPorAdmin">Pendiente</span>
               </td>
 
-              <!-- Columna de Botones Dinámicos -->
+              <!-- Columna de Botones Dinámicos (Con la nueva acción para activas) -->
               <td class="text-center">
+                
+                <!-- CASO 1: Pendiente (No activa, No evaluada) -->
                 <ng-container *ngIf="!cond.activo && !cond.aprobadaPorAdmin">
                   <button class="btn btn-success btn-sm me-2" (click)="evaluarConductora(cond, true)">
                     Habilitar Licencia
@@ -191,11 +219,28 @@
                     Rechazar
                   </button>
                 </ng-container>
+                
+                <!-- CASO 2: Rechazada (No activa, Sí evaluada) -->
                 <ng-container *ngIf="!cond.activo && cond.aprobadaPorAdmin">
                   <button class="btn btn-outline-primary btn-sm" (click)="evaluarConductora(cond, true)">
                     Inspeccionar o habilitar nuevamente
                   </button>
                 </ng-container>
+
+                <!-- CASO 3: Activa (Sí activa, Sí evaluada) -> ¡Nuevo botón para Suspender! -->
+                <ng-container *ngIf="cond.activo && cond.aprobadaPorAdmin">
+                  <button class="btn btn-outline-danger btn-sm" (click)="evaluarConductora(cond, false)">
+                    Desactivar / Suspender
+                  </button>
+                </ng-container>
+
+              </td>
+            </tr>
+
+            <!-- Mensaje amigable por si la búsqueda no da resultados -->
+            <tr *ngIf="conductorasVisibles.length === 0">
+              <td colspan="4" class="text-center text-muted py-3">
+                No se encontraron conductoras.
               </td>
             </tr>
         </tbody>
