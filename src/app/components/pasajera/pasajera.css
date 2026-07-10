@@ -117,3 +117,29 @@
   background: var(--taxifem-pink);
   color: #fff;
 }
+.map-container {
+  width: 100%;
+  height: 280px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+/* Estilo para que las sugerencias floten correctamente */
+.sugerencias-dropdown {
+  z-index: 1050; /* Por encima de los otros inputs */
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 2px;
+}
+
+.sugerencias-dropdown .list-group-item {
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+/* Efecto hover interactivo con el color corporativo */
+.sugerencias-dropdown .list-group-item:hover {
+  border-left: 3px solid #e11d48;
+  background-color: #fff1f2;
+}

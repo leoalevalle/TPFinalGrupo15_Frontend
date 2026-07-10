@@ -5,6 +5,8 @@ import { VehiculoCard } from '../vehiculo-card/vehiculo-card';
 import { CambioVehiculoModal } from '../cambio-vehiculo-modal/cambio-vehiculo-modal'; 
 import { AuthService } from '../../services/auth.service';
 import { ConductoraService } from '../../services/conductora.service';
+import { MapaService } from '../../services/mapa.service';
+import { GeocodingService } from '../../services/geocoding.service';
 
 @Component({
   selector: 'app-conductora',
@@ -22,12 +24,17 @@ export class Conductora implements OnInit, OnDestroy {
   pestanaActiva: string = 'vehiculo';
   monto: any = null;
   private refreshInterval: any;
+  private mapaInicializado: boolean = false;
+  private idViajeDibujado: string | null = null;
+  private tipoServicioDibujado: 'propuesta' | 'activo' | null = null;
 
   constructor(
     private authService: AuthService, 
     private conductoraService: ConductoraService, 
     private cdr: ChangeDetectorRef,
-    private zone: NgZone
+    private zone: NgZone,
+    private mapaService: MapaService,
+    private geocodingService: GeocodingService
   ) {}
 
   ngOnInit() {
@@ -46,7 +53,7 @@ export class Conductora implements OnInit, OnDestroy {
       this.zone.run(() => {
         this.consultarPanelEnVivo();
       });
-    }, 5000);
+    }, 10000);
   }
 
   ngOnDestroy() {
@@ -67,11 +74,13 @@ export class Conductora implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         } else {
           this.viajeActivo = null;
+          this.mapaInicializado = false;
 
           this.conductoraService.obtenerPropuesta().subscribe({
             next: (solicitud) => {
               if (solicitud) {
                 this.propuesta = solicitud;
+                this.procesarMapaParaViaje(solicitud);
               } else if (this.propuesta && this.propuesta.estado === 'Aceptada') {
                 console.log("Manteniendo cartel de 'Esperando despacho' en el frontend");
               } else {
@@ -91,6 +100,68 @@ export class Conductora implements OnInit, OnDestroy {
       },
       error: (err) => console.error("Error al obtener viaje activo:", err)
     });
+  }
+
+  private procesarMapaParaViaje(datosViaje: any) {
+  // 1. Identificamos de manera única este viaje/propuesta
+  const idActual = datosViaje.idViaje || datosViaje.idSolicitud || datosViaje.origen + datosViaje.destino;
+  const tipoActual = datosViaje.estadoViaje ? 'activo' : 'propuesta';
+
+  // 2. CONTROL CLAVE: Si ya estamos mostrando este mismo mapa, NO HACEMOS NADA.
+  // Esto evita que el bucle de 5 segundos destruya el mapa continuamente.
+  if (this.mapaInicializado && this.idViajeDibujado === idActual && this.tipoServicioDibujado === tipoActual) {
+    return; 
+  }
+
+  // Guardamos el registro de lo que vamos a dibujar ahora
+  this.idViajeDibujado = idActual;
+  this.tipoServicioDibujado = tipoActual;
+  this.mapaInicializado = true;
+
+  // Caso A: El backend ya provee las coordenadas directamente
+  if (datosViaje.lonOrigen && datosViaje.latOrigen && datosViaje.lonDestino && datosViaje.latDestino) {
+    setTimeout(() => {
+      this.inicializarYFijarRuta(
+        datosViaje.lonOrigen, datosViaje.latOrigen, 
+        datosViaje.lonDestino, datosViaje.latDestino
+      );
+    }, 100);
+    return;
+  }
+
+  // Caso B: El backend solo envió texto. ¡Buscamos las coordenadas en vivo!
+  if (datosViaje.origen && datosViaje.destino) {
+    const latJujuy = -24.185;
+    const lonJujuy = -65.299;
+    const textoOrigenSeguro = `${datosViaje.origen}, Jujuy, Argentina`;
+    const textoDestinoSeguro = `${datosViaje.destino}, Jujuy, Argentina`;
+
+    this.geocodingService.buscarSugerencias(textoOrigenSeguro, latJujuy, lonJujuy).subscribe(origenRes => {
+      if (origenRes && origenRes.length > 0) {
+        const puntoOrigen = origenRes[0];
+
+        this.geocodingService.buscarSugerencias(datosViaje.destino, latJujuy, lonJujuy).subscribe(destinoRes => {
+          if (destinoRes && destinoRes.length > 0) {
+            const puntoDestino = destinoRes[0];
+
+            setTimeout(() => {
+              this.inicializarYFijarRuta(
+                puntoOrigen.lon, puntoOrigen.lat,
+                puntoDestino.lon, puntoDestino.lat
+              );
+            }, 100);
+          }
+        });
+      }
+    });
+  }
+  }
+
+  private inicializarYFijarRuta(lonO: number, latO: number, lonD: number, latD: number) {
+  this.mapaService.inicializarMapa('mapa-conductora', lonO, latO, 13);
+  this.mapaService.fijarMarcadorOrigen(lonO, latO);
+  this.mapaService.fijarMarcadorDestino(lonD, latD);
+  this.mapaService.trazarRuta(lonO, latO, lonD, latD);
   }
 
   responder(aceptar: boolean) {
@@ -185,6 +256,10 @@ export class Conductora implements OnInit, OnDestroy {
   refrescar(){
     this.viajeActivo = null; 
     this.propuesta = null;
+    this.mapaInicializado = false;
+    this.idViajeDibujado = null;
+    this.tipoServicioDibujado = null;
+    this.mapaService.destruirMapa();
     this.zone.run(() => {
           this.obtenerGananciasDelDia();
           this.cdr.markForCheck();

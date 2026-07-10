@@ -44,4 +44,28 @@ export class GeocodingService {
   );
 
  }
+buscarSugerencias(texto: string, lat: number, lon: number): Observable<any[]> {
+  const apiKey = '25ab86606b5a4c959bbd88baa4372d73'; // Usa tu API Key de Geoapify
+  
+  // Codificamos el texto para la URL
+  const query = encodeURIComponent(texto);
+  
+  // Configuramos filtros: sesgar por ubicación actual (bias) y filtrar solo por Argentina (countrycode:ar)
+  const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${query}&filter=countrycode:ar&bias=proximity:${lon},${lat}&limit=5&format=json&apiKey=${apiKey}`;
+
+  const headers = new HttpHeaders();
+
+  return this.http.get<any>(url, { headers: headers }).pipe(
+    map(resp => {
+      if (!resp.results) return [];
+
+      return resp.results.map((item: any) => ({
+        direccionCompleta: item.formatted,
+        nombreCorto: item.name || item.address_line1,
+        lon: item.lon,
+        lat: item.lat
+      }));
+    })
+  );
+  }
 }

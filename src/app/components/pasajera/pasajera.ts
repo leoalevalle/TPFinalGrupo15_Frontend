@@ -6,7 +6,8 @@ import Swal from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { PasajeraService } from '../../services/pasajera.service';
 import { Solicitud } from '../../models/solicitud';
-import { GeocodingService } from '../../services/geocoding.service'
+import { GeocodingService } from '../../services/geocoding.service';
+import { MapaService } from '../../services/mapa.service';
 
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -24,6 +25,10 @@ export class Pasajera implements OnInit, OnDestroy {
   usuario: any;
   solicitudForm!: FormGroup;
   cargando: boolean = false;
+  sugerenciasDestino: any[] = [];
+  latActual: number = -24.18579;
+  lonActual: number = -65.29948;
+  coordenadasDestino: { lat: number, lon: number } | null = null;
   
   // Guardará la solicitud activa que viene del backend o null si no hay viaje
   solicitudActual: any = null; 
@@ -35,7 +40,8 @@ export class Pasajera implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private transaccionService: PasajeraService,
     private geocodingService: GeocodingService,
-    private authService: AuthService
+    private authService: AuthService,
+    private mapaService: MapaService
   ) {}
 
   ngOnInit(): void {
@@ -67,36 +73,57 @@ export class Pasajera implements OnInit, OnDestroy {
   }
 
   detectarUbicacionInicial() {
+    if (!navigator.geolocation) return;
 
-  if (!navigator.geolocation) {
-    return;
+    navigator.geolocation.getCurrentPosition((pos) => {
+      this.latActual = pos.coords.latitude;
+      this.lonActual = pos.coords.longitude;
+
+      this.mapaService.inicializarMapa('geoapify-map', this.lonActual, this.latActual);
+
+      this.geocodingService.obtenerUbicacion(this.latActual, this.lonActual).subscribe({
+        next: (ubicacion) => {
+          this.solicitudForm.patchValue({
+            origen: ubicacion.origen,
+            zona: ubicacion.zona
+          });
+        },
+        error: (err) => console.error(err)
+      });
+    });
   }
 
-  navigator.geolocation.getCurrentPosition((pos) => {
+  onEscribiendoDestino(event: any) {
+    const texto = event.target.value;
 
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
+    if (!texto || texto.length < 3) {
+      this.sugerenciasDestino = [];
+      return;
+    }
 
-    this.geocodingService.obtenerUbicacion(lat, lng).subscribe({
-
-      next: (ubicacion) => {
-
-        this.solicitudForm.patchValue({
-
-          origen: ubicacion.origen,
-
-          zona: ubicacion.zona
-
-        });
-
+    // Buscamos sugerencias basadas en el texto y la posición actual de la pasajera
+    this.geocodingService.buscarSugerencias(texto, this.latActual, this.lonActual).subscribe({
+      next: (resultados) => {
+        this.sugerenciasDestino = resultados;
       },
-
       error: (err) => console.error(err)
+    });
+  }
 
+  seleccionarDestino(sugerencia: any) {
+    // 1. Asignamos el nombre amigable en el input del formulario
+    this.solicitudForm.patchValue({
+      destino: sugerencia.nombreCorto
     });
 
-  });
+    // 2. Guardamos las coordenadas para el backend si las necesitas
+    this.coordenadasDestino = { lat: sugerencia.lat, lon: sugerencia.lon };
 
+    // 3. Colocamos un marcador azul en el mapa para el destino y centramos la vista
+    this.mapaService.fijarMarcadorDestino(sugerencia.lon, sugerencia.lat);
+
+    // 4. Limpiamos la lista desplegable
+    this.sugerenciasDestino = [];
   }
 
   solicitarViaje() {
