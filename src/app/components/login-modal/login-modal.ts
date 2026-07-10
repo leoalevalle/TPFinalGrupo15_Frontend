@@ -1,9 +1,10 @@
-﻿import { ChangeDetectorRef, Component } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { GoogleRegister } from '../../services/google-register';
 
 @Component({
   selector: 'app-login-modal',
@@ -12,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login-modal.html',
   styleUrl: './login-modal.css',
 })
-export class LoginModal {
+export class LoginModal implements OnInit {
   activeTab = 'login';
   loginForm!: FormGroup;
   registerForm!: FormGroup;
@@ -23,6 +24,7 @@ export class LoginModal {
     private authService: AuthService,
     private router: Router,
     private cd: ChangeDetectorRef,
+    private googleRegister: GoogleRegister
   ) {
     this.loginForm = this.fb.group({
       nomUsuario: ['', Validators.required],
@@ -195,4 +197,35 @@ export class LoginModal {
         console.log('ROL NO RECONOCIDO:', rol);
     }
   }
+
+  ngOnInit(): void{
+
+    this.googleRegister.registrar$.subscribe(datos=>{
+
+    this.activeTab = datos.tipo;
+    this.cd.detectChanges(); 
+    
+    const modal = document.getElementById('loginModal');
+    if(modal){
+      // @ts-ignore
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+    }
+       this.activeTab = datos.tipo;
+        if(datos.tipo === 'register'){
+            this.registerForm.patchValue({
+                nombre: datos.nombre,
+                email: datos.email
+            });
+
+        }else{
+            this.conductoraForm.patchValue({
+                nombre: datos.nombre,
+                email: datos.email
+            });
+        }
+    });
+  }
+
+
 }

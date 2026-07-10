@@ -2,7 +2,10 @@ import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
- 
+import { Output, EventEmitter } from '@angular/core';
+import { GoogleRegister } from '../../services/google-register';
+import Swal from 'sweetalert2';
+
 declare const google: any; // Declara 'google' para evitar errores de TypeScript 
 
 @Component({
@@ -17,7 +20,8 @@ export class GoogleLogin implements OnInit {
    constructor(
     private ngZone: NgZone,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private googleRegister: GoogleRegister
    ) {} 
  
   ngOnInit(): void { 
@@ -98,7 +102,53 @@ export class GoogleLogin implements OnInit {
         }
       },
       error:()=>{
-        alert("No existe una cuenta registrada con ese correo.");
+        Swal.fire({
+        title: 'No encontramos una cuenta',
+        text: '¿Cómo deseas registrarte?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '🟣 Pasajera',
+        cancelButtonText: '🟣 Conductora',
+        reverseButtons: true
+
+    }).then(resultado => {
+        if(resultado.isConfirmed){
+            this.authService.registerGoogle({
+                nombre: decodedToken.name,
+                email: decodedToken.email
+            }).subscribe({
+        next:(res:any)=>{
+            this.authService.guardarSesion(res);
+            this.cerrarModal();
+            Swal.fire({
+                icon:'success',
+                title:'¡Bienvenida a TaxiFem!',
+                text:'Tu cuenta fue creada automáticamente.',
+                timer:1800,
+                showConfirmButton:false
+            }).then(()=>{
+                this.router.navigate(['/pasajera']);
+            });
+        },
+        error:(err:any)=>{
+            Swal.fire({
+                icon:'error',
+                title:'Error',
+                text:err.error.msg
+            });
+        }
+    });
+
+        }else if(resultado.dismiss === Swal.DismissReason.cancel){
+            this.cerrarModal(); 
+            this.googleRegister.abrirRegistro({
+                tipo: 'conductora',
+                nombre: decodedToken.name,
+                email: decodedToken.email
+            });
+        }
+    });
+      
       }
     });
 
@@ -126,5 +176,7 @@ export class GoogleLogin implements OnInit {
     modalInstance?.hide();
   }
   }
+
+  @Output() usuarioGoogleNuevo = new EventEmitter<any>();
   
 }

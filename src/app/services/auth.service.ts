@@ -51,4 +51,12 @@ export class AuthService {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
   }
+
+  registerGoogle(data:any){
+    return this.http.post(
+        `${this.apiUrl}/auth/register-google-pasajera`,
+        data
+    );
+  }
 }
+
