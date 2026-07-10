@@ -87,4 +87,12 @@ export class ConductoraService {
   obtenerResumenDiario(): Observable<any> {
     return this.http.get<any>(`${this.api}/transaccion/conductoras/resumen`);
   }
+
+  confirmarPagoEfectivo(idViaje: number): Observable<any> {
+    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/confirmar-pago-efectivo`, {});
+  }
+
+  confirmarPagoMercadoPago(idViaje: number): Observable<any> {
+    return this.http.post<any>(`${this.api}/transaccion/viajes/${idViaje}/crear-preferencia-mp`, {});
+  }
 }
