@@ -1,14 +1,14 @@
 <div class="container py-5">
-  <div class="row mb-4">
-    <div class="col">
-      <h2 class="border-bottom pb-2"><i class="fa-solid fa-user-gear text-primary"></i> Panel de Control Administrativo — TaxFem</h2>
-    </div>
-  </div>
-
   <div class="card shadow-sm mb-5">
     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
       <h4 class="mb-0"><i class="fa-solid fa-chart-line"></i> Estadísticas e Informe Operacional</h4>
-      <div class="d-flex gap-2">
+      
+      <div class="d-flex gap-2 align-items-center">
+        <!-- 🌟 NUEVO BOTÓN: Solo se muestra si hay datos cargados para exportar -->
+        <button *ngIf="informeData" class="btn btn-sm btn-danger me-2" (click)="exportarPDF()">
+          <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+        </button>
+
         <select class="form-select form-select-sm" [(ngModel)]="mesFiltro" (change)="obtenerInforme()">
           <option [ngValue]="1">Enero</option>
           <option [ngValue]="2">Febrero</option>
@@ -23,48 +23,49 @@
           <option [ngValue]="11">Noviembre</option>
           <option [ngValue]="12">Diciembre</option>
         </select>
+        
         <select class="form-select form-select-sm" [(ngModel)]="anioFiltro" (change)="obtenerInforme()">
           <option [ngValue]="2026">2026</option>
           <option [ngValue]="2027">2027</option>
         </select>
       </div>
     </div>
+
     <div class="card-body bg-light">
       <div class="row text-center" *ngIf="informeData">
-
-        <div class="col-md-4">
-            <div class="p-3 bg-white border rounded">
-            <h6 class="text-muted text-uppercase">Viajes Completados</h6>
-            <h3 class="text-success fw-bold">
-                {{ informeData.serviciosCompletados }}
-            </h3>
+        <div class="col-md-7">
+          <div class="row text-center g-3">
+            <div class="col-12">
+                <div class="p-3 bg-white border rounded">
+                <h6 class="text-muted text-uppercase">Recaudación Total</h6>
+                <h3 class="text-primary fw-bold">${{ informeData.recaudacionTotal }}</h3>
+                </div>
             </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="p-3 bg-white border rounded">
-            <h6 class="text-muted text-uppercase">Recaudación Total</h6>
-            <h3 class="text-primary fw-bold">
-                ${{ informeData.recaudacionTotal }}
-            </h3>
+            <div class="col-6">
+                <div class="p-3 bg-white border rounded">
+                <h6 class="text-muted text-uppercase">Viajes Completados</h6>
+                <h3 class="text-success fw-bold">{{ informeData.serviciosCompletados }}</h3>
+                </div>
             </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="p-3 bg-white border rounded">
-            <h6 class="text-muted text-uppercase">Viajes Cancelados</h6>
-            <h3 class="text-warning fw-bold">
-                {{ informeData.serviciosCancelados }}
-            </h3>
+            <div class="col-6">
+                <div class="p-3 bg-white border rounded">
+                <h6 class="text-muted text-uppercase">Viajes Cancelados</h6>
+                <h3 class="text-warning fw-bold">{{ informeData.serviciosCancelados }}</h3>
+                </div>
             </div>
+          </div>
         </div>
-
+        <div class="col-md-5">
+          <div class="p-3 bg-white border rounded text-center" style="max-height: 250px; display: flex; justify-content: center;">
+            <canvas #graficoCanvas></canvas>
+          </div>
         </div>
+      </div>
       <div *ngIf="!informeData" class="text-center text-muted py-2">
         No se registran transacciones operativas en el período seleccionado.
       </div>
     </div>
-  </div>
+</div>
 
   <div class="row mb-5">
     <div class="col-lg-4">
