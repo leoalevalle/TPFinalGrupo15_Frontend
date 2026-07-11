@@ -7,7 +7,8 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class OperadoraService {
-  private api = 'http://localhost:3000/api/transaccion';
+   private api = 'https://tpfinalgrupo15-backend.onrender.com/api/transaccion';
+  //private api = 'http://localhost:3000/api/transaccion';
 
   constructor(
     private http: HttpClient,

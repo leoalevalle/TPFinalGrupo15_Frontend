@@ -6,7 +6,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AdministracionService {
-  private api = 'http://localhost:3000/api'; 
+  private api = 'https://tpfinalgrupo15-backend.onrender.com/api';
+  //private api = 'http://localhost:3000/api'; 
 
   constructor(private http: HttpClient) {}
 

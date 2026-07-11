@@ -11,7 +11,8 @@ export interface HelloResponse {
   providedIn: 'root'
 })
 export class HelloService {
-  private apiUrl = 'http://localhost:3000/api/hello';
+  private apiUrl = 'https://tpfinalgrupo15-backend.onrender.com/api/hello';
+  //private apiUrl = 'http://localhost:3000/api/hello';
 
   constructor(private http: HttpClient) { }
 
