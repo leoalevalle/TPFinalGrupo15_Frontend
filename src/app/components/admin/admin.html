@@ -250,4 +250,53 @@
   </div>
 </div>
 
+<!-- 🚗 SECCIÓN: GESTIÓN DE CAMBIO DE VEHÍCULOS -->
+<div class="card shadow mt-5">
+  <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+    <h3 class="mb-0"><i class="fa-solid fa-car-side"></i> Solicitudes de Cambio de Vehículo</h3>
+    <button class="btn btn-sm btn-outline-light" (click)="cargarCambiosVehiculo()">
+      <i class="fa-solid fa-rotate"></i> Actualizar
+    </button>
+  </div>
+  
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Conductora</th>
+          <th>Email</th>
+          <th class="text-center">Vehículo Solicitado (ID)</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Iteramos sobre las conductoras con cambios pendientes -->
+        <tr *ngFor="let cambio of solicitudesCambioVehiculo">
+          <td><strong>{{ cambio.nombre }}</strong></td>
+          <td>{{ cambio.email }}</td>
+          <td class="text-center">
+            <span class="badge bg-info text-dark px-3 py-2 fs-6">
+              <i class="fa-solid fa-car"></i> ID Vehículo: {{ cambio.idVehiculoSolicitado }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-success btn-sm me-2" (click)="evaluarCambioVehiculo(cambio, true)">
+              Autorizar Cambio
+            </button>
+            <button class="btn btn-outline-danger btn-sm" (click)="evaluarCambioVehiculo(cambio, false)">
+              Rechazar
+            </button>
+          </td>
+        </tr>
+
+        <!-- Estado vacío por si nadie pidió cambios -->
+        <tr *ngIf="solicitudesCambioVehiculo.length === 0">
+          <td colspan="4" class="text-center text-muted py-4">
+            No hay solicitudes de cambio de vehículo pendientes.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 </div>

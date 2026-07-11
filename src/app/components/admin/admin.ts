@@ -17,6 +17,7 @@ export class Admin implements OnInit {
   solicitudesPendientes: any[] = [];
   todasLasConductoras: any[] = []; 
   conductorasVisibles: any[] = [];
+  solicitudesCambioVehiculo: any[] = [];
 
   terminoBusqueda: string = '';  
   filtroActivo: boolean = false;
@@ -40,6 +41,7 @@ export class Admin implements OnInit {
     this.cargarVehiculos();
     this.obtenerInforme();
     this.cargarSolicitudes();
+    this.cargarCambiosVehiculo();
   }
 
   // =========================================================================
@@ -214,13 +216,33 @@ export class Admin implements OnInit {
     });
   }
 
-  aprobarCambioCocheChofer(idSolicitud: number, aprobado: boolean) {
-    this.adminService.gestionarCambioVehiculoAdmin(idSolicitud, aprobado).subscribe({
-      next: () => {
-        Swal.fire('Solicitud de Cambio Cerrada', aprobado ? 'Vehículo asignado a la chofer.' : 'Cambio rechazado.', 'success');
-        this.cargarVehiculos(); // Refrescar flota por si cambiaron asociaciones
+  cargarCambiosVehiculo(): void {
+    this.adminService.getCambiosVehiculoPendientes().subscribe({
+      next: (res: any) => {
+        if (res && res.status === '1') {
+          this.solicitudesCambioVehiculo = res.data;
+        }
       },
-      error: (err) => Swal.fire('Error', 'No se pudo procesar la solicitud del coche.', 'error')
+      error: (err) => console.error('Error al obtener solicitudes de cambio de coche', err)
+    });
+  }
+
+  evaluarCambioVehiculo(conductora: any, autorizar: boolean): void {
+    const datosEnvio = {
+      idConductora: conductora.idUsuario,
+      idVehiculo: conductora.idVehiculoSolicitado,
+      autorizar: autorizar
+    };
+
+    this.adminService.gestionarCambioVehiculo(datosEnvio).subscribe({
+      next: (res: any) => {
+        Swal.fire('¡Procesado!', res.message || 'Cambio registrado.', 'success');
+        
+        this.cargarCambiosVehiculo();
+      },
+      error: (err) => {
+        Swal.fire('Error', err.error?.error || 'No se pudo procesar el cambio.', 'error');
+      }
     });
   }
 }

@@ -43,10 +43,9 @@ export class AdministracionService {
     return this.http.put<any>(`${this.api}/vehiculos/${idVehiculo}/estado`, { activo });
   }
 
-  // Ruta: PUT /api/conductoras/:idConductora/cambiar-vehiculo
-
-  gestionarCambioVehiculoPorConductora(idConductora: number, datosCambio: any): Observable<any> {
-    return this.http.put<any>(`${this.api}/conductoras/${idConductora}/cambiar-vehiculo`, datosCambio);
+  
+  gestionarCambioVehiculo(datos: any): Observable<any> {
+    return this.http.put<any>(`${this.api}/admin/conductoras/aprobar-vehiculo`, datos);
   }
 
   // =========================================================================
@@ -74,10 +73,10 @@ export class AdministracionService {
     return this.http.put<any>(`${this.api}/admin/vehiculos/${idVehiculo}/estado`, { activo });
   }
 
-  //Ruta: PUT /api/admin/conductoras/aprobar-vehiculo
-  gestionarCambioVehiculoAdmin(idSolicitud: number, aprobado: boolean): Observable<any> {
-    return this.http.put<any>(`${this.api}/admin/conductoras/aprobar-vehiculo`, { idSolicitud, aprobado });
+  getCambiosVehiculoPendientes(): Observable<any> {
+    return this.http.get<any>(`${this.api}/admin/cambios-vehiculo-pendientes`);
   }
+  
 
   // =========================================================================
   // INFORMES Y ESTADÍSTICAS

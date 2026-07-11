@@ -22,6 +22,7 @@ export class CambioVehiculoModal implements OnInit {
   vehiculos: any[] = [];
   idNuevoVehiculo: number = 0;
   mensaje = '';
+  mensajeExito = '';
 
   constructor(
     private conductoraService: ConductoraService,
@@ -39,13 +40,13 @@ export class CambioVehiculoModal implements OnInit {
 
     this.conductoraService.listarVehiculos()
       .subscribe({
-        next: (data:any) => {
-          this.vehiculos = data;
+        next: (respuesta:any) => {
+          this.vehiculos = respuesta.data || respuesta;;
           this.cdr.detectChanges();
         },
 
         error: err => {
-          console.error(err);
+          console.error("error al cargar los vehiculos",err);
         }
 
       });
@@ -65,14 +66,15 @@ export class CambioVehiculoModal implements OnInit {
       .subscribe({
 
         next: (respuesta:any) => {
-          this.mensaje = respuesta.message;
-          alert(this.mensaje);
+          this.mensajeExito = "Cambio de vehículo registrado con éxito. Pendiente de aprobación por la Administradora.";
+          this.idNuevoVehiculo = 0; 
           this.cdr.detectChanges();
         },
 
         error: err => {
-          console.error(err);
-          alert(err.error.error);
+          console.error("error al solicitar cambio de vehículo",err);
+          this.mensajeExito = ''; 
+          alert(err.error?.error || 'No se pudo procesar la solicitud.');
 
         }
 
