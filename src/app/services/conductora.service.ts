@@ -8,8 +8,8 @@ import { Vehiculo } from '../models/vehiculo';
 })
 export class ConductoraService {
 
-  private api="http://localhost:3000/api";
-  // 'https://tpfinalgrupo15-backend.onrender.com/api'
+  //private api="http://localhost:3000/api";
+  private api = 'https://tpfinalgrupo15-backend.onrender.com/api';
   constructor(private http:HttpClient){} 
       
   iniciarJornada(data:any){
