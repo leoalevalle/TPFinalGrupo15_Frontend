@@ -225,7 +225,7 @@ export class Conductora implements OnInit, OnDestroy {
         this.monto = res.viaje.monto;
         const idViaje = res.viaje.idViaje;
 
-        this.isProcesandoPago = true; // 🔥 Bloqueamos la interfaz desde acá
+        this.isProcesandoPago = true; 
         this.mostrarMenuPago(idViaje);
       },
       error: (err) => {
@@ -253,13 +253,13 @@ export class Conductora implements OnInit, OnDestroy {
         this.conductoraService.confirmarPagoEfectivo(idViaje).subscribe({
           next: () => {
             Swal.fire('¡Éxito!', 'Pago en efectivo registrado.', 'success');
-            this.isProcesandoPago = false; // 🔥 Liberamos la interfaz: el pago fue exitoso
+            this.isProcesandoPago = false; 
             this.limpiarPantallaViaje();
             this.reanudarIntervalo();
           },
           error: (err) => {
             Swal.fire('Error', err.error?.error || 'No se pudo registrar el pago', 'error');
-            this.reanudarIntervalo(); // Mantiene isProcesandoPago en true para que reintente
+            this.reanudarIntervalo();
           }
         });
       }
@@ -267,7 +267,6 @@ export class Conductora implements OnInit, OnDestroy {
         this.pagarMercadoPago(idViaje);
       }
       else {
-        // Si toca "Volver", cancela el flujo y liberamos el bloqueo
         this.isProcesandoPago = false; 
         this.reanudarIntervalo();
       }
@@ -302,17 +301,16 @@ export class Conductora implements OnInit, OnDestroy {
           `,
           confirmButtonText: 'Abrir Pasarela',
           showDenyButton: true,
-          denyButtonText: 'Ya pagó (Confirmar)', // El botón que esperabas presionar tranquilo
+          denyButtonText: 'Ya pagó (Confirmar)', 
           showCancelButton: true,
           cancelButtonText: 'Cambiar método',
           allowOutsideClick: false,
           preConfirm: () => {
             window.open(mpRes.sandbox_init_point, '_blank');
-            return false; // Evita que "Abrir Pasarela" cierre el cartel
+            return false; 
           }
         }).then((resultado) => {
           if (resultado.isDenied) {
-            // CUANDO LA CONDUCTORA CONFIRMA MANUALMENTE EL COMPROBANTE
             const paymentIdSimulado = `MP-SIM-${Date.now()}`;
             this.conductoraService.registrarPagoMercadoPago(idViaje, paymentIdSimulado).subscribe({
               next: () => {
@@ -321,7 +319,7 @@ export class Conductora implements OnInit, OnDestroy {
                   title: 'Pago registrado',
                   text: 'Pago de Mercado Pago registrado correctamente.'
                 });
-                this.isProcesandoPago = false; // 🔥 Liberamos la UI tras impactar en la BD
+                this.isProcesandoPago = false; 
                 this.limpiarPantallaViaje();
                 this.reanudarIntervalo();
               },
@@ -331,7 +329,7 @@ export class Conductora implements OnInit, OnDestroy {
             });
           }
           else if (resultado.dismiss === Swal.DismissReason.cancel) {
-            this.mostrarMenuPago(idViaje); // Vuelve al menú anterior, mantiene bloqueado
+            this.mostrarMenuPago(idViaje);
           }
           else {
             this.isProcesandoPago = false;
