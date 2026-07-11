@@ -24,6 +24,7 @@ export class Admin implements OnInit {
   todasLasConductoras: any[] = []; 
   conductorasVisibles: any[] = [];
   solicitudesCambioVehiculo: any[] = [];
+  listaPasajeras: any[] = [];
 
   terminoBusqueda: string = '';  
   filtroActivo: boolean = false;
@@ -49,6 +50,7 @@ export class Admin implements OnInit {
     this.exportarPDF();
     this.cargarSolicitudes();
     this.cargarCambiosVehiculo();
+    this.cargarPasajeras();
   }
 
   // =========================================================================
@@ -259,54 +261,29 @@ export class Admin implements OnInit {
   // =========================================================================
   // GESTIÓN DE USUARIOS / PASAJERAS / CONDUCTORAS
   // =========================================================================
+  cargarPasajeras() {
+    this.adminService.obtenerPasajeras().subscribe({
+      next: (res) => this.listaPasajeras = res.data,
+      error: (err) => console.error('Error al cargar pasajeras', err)
+    });
+  }
+  evaluarPasajera(pasajera: any, aprobar: boolean) {
+    this.adminService.evaluarPasajera(pasajera.idUsuario, aprobar).subscribe({
+      next: (res) => {
+        pasajera.aprobadaPorAdmin = aprobar; // Reflejo inmediato en la pantalla
+      },
+      error: (err) => alert(err.error?.msg || 'Error al evaluar')
+    });
+  }
+  alternarBaneoPasajera(pasajera: any, estadoActivo: boolean) {
+    this.adminService.cambiarEstadoUsuario(pasajera.idUsuario, estadoActivo).subscribe({
+      next: (res) => {
+        pasajera.activo = estadoActivo; // Reflejo inmediato en la pantalla
+      },
+      error: (err) => console.error(err)
+    });
+  }
   
-  // Sirve para banear o activar a cualquier usuario (idUsuario)
-  alterarEstadoUsuario(idUsuario: number, estadoActual: boolean) {
-    const accion = estadoActual ? 'desactivar/banear' : 'activar';
-    
-    Swal.fire({
-      title: `¿Estás seguro de ${accion} este usuario?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, confirmar'
-    }).then((result: any) => {
-      if (result.isConfirmed) {
-        this.adminService.cambiarEstadoLogicoUsuario(idUsuario, !estadoActual).subscribe({
-          next: () => {
-            Swal.fire('¡Éxito!', `El usuario ha sido modificado.`, 'success');
-            // Aquí podrías recargar la lista de usuarios si tuvieras una
-          },
-          error: (err) => Swal.fire('Error', 'No se pudo cambiar el estado.', 'error')
-        });
-      }
-    });
-  }
-
-  evaluarPasajera(idPasajera: number, aprobar: boolean) {
-    Swal.fire({
-      title: aprobar ? '¿Aprobar registro de pasajera?' : '¿Rechazar registro?',
-      input: aprobar ? undefined : 'text', // Si rechaza, pide motivo
-      inputLabel: aprobar ? undefined : 'Motivo del rechazo',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Confirmar'
-    }).then((result: any) => {
-      if (result.isConfirmed) {
-        const datos = {
-          aprobado: aprobar,
-          observaciones: result.value || (aprobar ? 'Registro aprobado por auditoría' : 'No cumple requisitos')
-        };
-
-        this.adminService.evaluarRegistroPasajera(idPasajera, datos).subscribe({
-          next: () => Swal.fire('Procesado', 'La pasajera fue evaluada con éxito.', 'success'),
-          error: (err) => Swal.fire('Error', 'No se pudo evaluar el registro.', 'error')
-        });
-      }
-    });
-  }
-
   // =========================================================================
   // GESTIÓN Y EVALUACIÓN DE CONDUCTORAS
   // =========================================================================
