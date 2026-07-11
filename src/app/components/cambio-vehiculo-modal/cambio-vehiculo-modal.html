@@ -1,8 +1,14 @@
 <div class="card shadow-sm">
-
     <div class="card-body">
+        <div *ngIf="mensajeExito" class="alert alert-success alert-dismissible fade show border-success" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <strong>¡Solicitud procesada!</strong> {{ mensajeExito }}
+            <button type="button" class="btn-close" (click)="mensajeExito = ''" aria-label="Close"></button>
+        </div>
+
         <h4>Solicitar cambio de vehículo</h4>
         <hr>
+        
         <label class="form-label">
             Seleccione un vehículo
         </label>
@@ -28,9 +34,8 @@
         <button
             class="btn btn-primary"
             (click)="solicitarCambio()"
-            [disabled]="idNuevoVehiculo==0">
+            [disabled]="idNuevoVehiculo == 0">
             Enviar Solicitud
         </button>
     </div>
-
 </div>

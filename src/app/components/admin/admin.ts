@@ -15,6 +15,12 @@ export class Admin implements OnInit {
   // Listados locales para renderizar en las tablas
   vehiculos: any[] = [];
   solicitudesPendientes: any[] = [];
+  todasLasConductoras: any[] = []; 
+  conductorasVisibles: any[] = [];
+  solicitudesCambioVehiculo: any[] = [];
+
+  terminoBusqueda: string = '';  
+  filtroActivo: boolean = false;
   
   // Variables para el formulario de Alta de Vehículo
   nuevoVehiculo = {
@@ -35,24 +41,49 @@ export class Admin implements OnInit {
     this.cargarVehiculos();
     this.obtenerInforme();
     this.cargarSolicitudes();
+    this.cargarCambiosVehiculo();
   }
 
   // =========================================================================
   // MÉTODOS DE CONSULTA (GET)
   // =========================================================================
   cargarSolicitudes(): void {
+    this.terminoBusqueda = ''; 
     this.adminService.getSolicitudesAlta().subscribe({
       next: (res: any) => {
-        // Imprimimos en consola para ver cómo vienen los nombres de las variables
         console.log('Datos que trae el back para las conductoras:', res); 
         
         if (res && res.status === '1') {
           this.solicitudesPendientes = res.data;
+          this.filtrarConductoras();
         }
       },
       error: (err) => console.error('Error al cargar solicitudes de conductoras', err)
     });
   }
+
+  filtrarConductoras(): void {
+    const termino = this.terminoBusqueda.trim().toLowerCase();
+
+    if (termino === '') {
+      this.conductorasVisibles = this.solicitudesPendientes.filter(
+        cond => cond.aprobadaPorAdmin === false
+      );
+    } else {
+        this.conductorasVisibles = this.solicitudesPendientes.filter(cond => {
+        return (
+          cond.nombre?.toLowerCase().includes(termino) ||
+          cond.email?.toLowerCase().includes(termino)
+        );
+      });
+    }
+  }
+
+  limpiarBusqueda(): void {
+    this.terminoBusqueda = '';
+    this.filtrarConductoras();
+  }
+
   cargarVehiculos() {
     this.adminService.listarVehiculos().subscribe({
       next: (res) => this.vehiculos = res,
@@ -150,6 +181,7 @@ export class Admin implements OnInit {
               conductora.activo = false;
               conductora.aprobadaPorAdmin = true;
             }
+            this.filtrarConductoras();
           },
           error: (err) => {
             Swal.fire('Error', err.error?.msg || 'No se pudo procesar la evaluación.', 'error');
@@ -184,13 +216,33 @@ export class Admin implements OnInit {
     });
   }
 
-  aprobarCambioCocheChofer(idSolicitud: number, aprobado: boolean) {
-    this.adminService.gestionarCambioVehiculoAdmin(idSolicitud, aprobado).subscribe({
-      next: () => {
-        Swal.fire('Solicitud de Cambio Cerrada', aprobado ? 'Vehículo asignado a la chofer.' : 'Cambio rechazado.', 'success');
-        this.cargarVehiculos(); // Refrescar flota por si cambiaron asociaciones
+  cargarCambiosVehiculo(): void {
+    this.adminService.getCambiosVehiculoPendientes().subscribe({
+      next: (res: any) => {
+        if (res && res.status === '1') {
+          this.solicitudesCambioVehiculo = res.data;
+        }
       },
-      error: (err) => Swal.fire('Error', 'No se pudo procesar la solicitud del coche.', 'error')
+      error: (err) => console.error('Error al obtener solicitudes de cambio de coche', err)
+    });
+  }
+
+  evaluarCambioVehiculo(conductora: any, autorizar: boolean): void {
+    const datosEnvio = {
+      idConductora: conductora.idUsuario,
+      idVehiculo: conductora.idVehiculoSolicitado,
+      autorizar: autorizar
+    };
+
+    this.adminService.gestionarCambioVehiculo(datosEnvio).subscribe({
+      next: (res: any) => {
+        Swal.fire('¡Procesado!', res.message || 'Cambio registrado.', 'success');
+        
+        this.cargarCambiosVehiculo();
+      },
+      error: (err) => {
+        Swal.fire('Error', err.error?.error || 'No se pudo procesar el cambio.', 'error');
+      }
     });
   }
 }
