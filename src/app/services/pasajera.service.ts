@@ -59,8 +59,15 @@ export class PasajeraService {
   }
 
   // Ruta: GET /api/operadora/solicitudes
-
   listarSolicitudesPendientes(): Observable<any[]> {
     return this.http.get<any[]>(`${this.api}/operadora/solicitudes`);
+  }
+
+  obtenerDetalleViajeCompleto(idViaje: number): Observable<any> {
+    return this.http.get<any>(`${this.api}/viajes/${idViaje}/detalle-completo`);
+  }
+
+  obtenerViajeActivoPasajera(idPasajera: number): Observable<any> {
+    return this.http.get<any>(`${this.api}/viajes/activo-pasajera/${idPasajera}`);
   }
 }
