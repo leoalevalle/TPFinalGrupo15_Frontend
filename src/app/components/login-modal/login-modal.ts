@@ -24,7 +24,7 @@ export class LoginModal implements OnInit {
     private authService: AuthService,
     private router: Router,
     private cd: ChangeDetectorRef,
-    private googleRegister: GoogleRegister
+    private googleRegister: GoogleRegister,
   ) {
     this.loginForm = this.fb.group({
       nomUsuario: ['', Validators.required],
@@ -94,6 +94,10 @@ export class LoginModal implements OnInit {
       const modalInstance = bootstrap.Modal.getInstance(modalEl);
       modalInstance?.hide();
     }
+    this.loginForm = this.fb.group({
+      nomUsuario: '',
+      contrasenia: '',
+    });
   }
   registrarse() {
     if (this.registerForm.invalid) return;
@@ -105,8 +109,8 @@ export class LoginModal implements OnInit {
         icon: 'warning',
         title: 'Acceso Restringido',
         text: 'La aplicación TaxiFem es de uso exclusivo para mujeres. Por favor, te invitamos a utilizar otro medio de transporte urbano.',
-        confirmButtonColor: '#9c27b0', 
-        confirmButtonText: 'Entendido'
+        confirmButtonColor: '#9c27b0',
+        confirmButtonText: 'Entendido',
       });
       return; // Frena el envío al backend
     }
@@ -148,7 +152,7 @@ export class LoginModal implements OnInit {
         title: 'Acceso Restringido',
         text: 'La plataforma TaxiFem admite únicamente a conductoras mujeres para garantizar la seguridad del servicio. Te invitamos a postularte en otras plataformas de transporte.',
         confirmButtonColor: '#9c27b0',
-        confirmButtonText: 'Entendido'
+        confirmButtonText: 'Entendido',
       });
       return; // Frena el envío al backend
     }
@@ -198,34 +202,29 @@ export class LoginModal implements OnInit {
     }
   }
 
-  ngOnInit(): void{
+  ngOnInit(): void {
+    this.googleRegister.registrar$.subscribe((datos) => {
+      this.activeTab = datos.tipo;
+      this.cd.detectChanges();
 
-    this.googleRegister.registrar$.subscribe(datos=>{
-
-    this.activeTab = datos.tipo;
-    this.cd.detectChanges(); 
-    
-    const modal = document.getElementById('loginModal');
-    if(modal){
-      // @ts-ignore
-      const bsModal = new bootstrap.Modal(modal);
-      bsModal.show();
-    }
-       this.activeTab = datos.tipo;
-        if(datos.tipo === 'register'){
-            this.registerForm.patchValue({
-                nombre: datos.nombre,
-                email: datos.email
-            });
-
-        }else{
-            this.conductoraForm.patchValue({
-                nombre: datos.nombre,
-                email: datos.email
-            });
-        }
+      const modal = document.getElementById('loginModal');
+      if (modal) {
+        // @ts-ignore
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+      }
+      this.activeTab = datos.tipo;
+      if (datos.tipo === 'register') {
+        this.registerForm.patchValue({
+          nombre: datos.nombre,
+          email: datos.email,
+        });
+      } else {
+        this.conductoraForm.patchValue({
+          nombre: datos.nombre,
+          email: datos.email,
+        });
+      }
     });
   }
-
-
 }

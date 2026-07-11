@@ -47,11 +47,7 @@
               </div>
             </div>
 
-            <input
-                class="form-control"
-                formControlName="zona"
-                readonly
-            >
+            <input class="form-control" formControlName="zona" readonly />
 
             <div class="detalle-item">
               <i class="bi bi-people-fill"></i>
@@ -73,7 +69,7 @@
       </div>
 
       <!-- Formulario para nueva solicitud -->
-      <div class="card pasajera-card shadow-sm" *ngIf="!solicitudActual">
+      <div class="card pasajera-card shadow-sm" *ngIf="solicitudActual === null">
         <div class="card-body p-4">
           <h5 class="mb-4"><i class="bi bi-car-front me-2"></i>Solicitar un viaje</h5>
 
@@ -90,30 +86,36 @@
               </small>
             </div>
 
-            <div class="mb-3 position-relative"> <!-- position-relative evita que el menú rompa el diseño -->
+            <div class="mb-3 position-relative">
+              <!-- position-relative evita que el menú rompa el diseño -->
               <label class="form-label"><i class="bi bi-flag-fill me-1"></i>Destino</label>
               <input
                 class="form-control pasajera-input"
                 formControlName="destino"
                 placeholder="Ej: Terminal de ómnibus"
                 autocomplete="off"
-                (input)="onEscribiendoDestino($event)" 
+                (input)="onEscribiendoDestino($event)"
               />
               <small class="text-danger" *ngIf="f['destino'].touched && f['destino'].invalid">
                 El destino es requerido.
               </small>
 
               <!-- Lista flotante de sugerencias -->
-              <div class="list-group position-absolute w-100 shadow sugerencias-dropdown" *ngIf="sugerenciasDestino.length > 0">
-                <button 
-                  type="button" 
+              <div
+                class="list-group position-absolute w-100 shadow sugerencias-dropdown"
+                *ngIf="sugerenciasDestino.length > 0"
+              >
+                <button
+                  type="button"
                   class="list-group-item list-group-item-action text-start"
                   *ngFor="let sug of sugerenciasDestino"
                   (click)="seleccionarDestino(sug)"
                 >
                   <i class="bi bi-geo-alt me-2 text-muted"></i>
-                  <strong>{{ sug.nombreCorto }}</strong> 
-                  <small class="text-muted d-block" style="font-size: 0.75rem;">{{ sug.direccionCompleta }}</small>
+                  <strong>{{ sug.nombreCorto }}</strong>
+                  <small class="text-muted d-block" style="font-size: 0.75rem">{{
+                    sug.direccionCompleta
+                  }}</small>
                 </button>
               </div>
             </div>

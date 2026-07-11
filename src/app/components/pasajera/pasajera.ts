@@ -1,6 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  FormsModule,
+} from '@angular/forms';
 import Swal from 'sweetalert2';
 
 import { AuthService } from '../../services/auth.service';
@@ -28,11 +34,11 @@ export class Pasajera implements OnInit, OnDestroy {
   sugerenciasDestino: any[] = [];
   latActual: number = -24.18579;
   lonActual: number = -65.29948;
-  coordenadasDestino: { lat: number, lon: number } | null = null;
-  
+  coordenadasDestino: { lat: number; lon: number } | null = null;
+
   // Guardará la solicitud activa que viene del backend o null si no hay viaje
-  solicitudActual: any = null; 
-  
+  solicitudActual: any = null;
+
   // Suscripción para el monitoreo en tiempo real
   private miSubscripcion!: Subscription;
 
@@ -41,7 +47,9 @@ export class Pasajera implements OnInit, OnDestroy {
     private transaccionService: PasajeraService,
     private geocodingService: GeocodingService,
     private authService: AuthService,
-    private mapaService: MapaService
+    private mapaService: MapaService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
   ) {}
 
   ngOnInit(): void {
@@ -55,8 +63,9 @@ export class Pasajera implements OnInit, OnDestroy {
       origen: ['', Validators.required],
       destino: ['', Validators.required],
       zona: ['', Validators.required],
-      cantPasajeros: [1, [Validators.required, Validators.min(1), Validators.max(4)]]
+      cantPasajeros: [1, [Validators.required, Validators.min(1), Validators.max(4)]],
     });
+    this.cdr.detectChanges();
   }
 
   // Getter rápido para las validaciones del HTML (el f['origen'] que pusiste)
@@ -66,7 +75,6 @@ export class Pasajera implements OnInit, OnDestroy {
 
   // Getter dinámico para habilitar/deshabilitar el botón de cancelar
   get puedeCancelar(): boolean {
-    if (!this.solicitudActual) return false;
     const estado = this.solicitudActual.estado;
     // Se puede cancelar si está Pendiente o en Propuesta (antes de que la chofer acepte)
     return estado === 'Pendiente' || estado === 'Propuesta';
@@ -85,10 +93,10 @@ export class Pasajera implements OnInit, OnDestroy {
         next: (ubicacion) => {
           this.solicitudForm.patchValue({
             origen: ubicacion.origen,
-            zona: ubicacion.zona
+            zona: ubicacion.zona,
           });
         },
-        error: (err) => console.error(err)
+        error: (err) => console.error(err),
       });
     });
   }
@@ -106,14 +114,14 @@ export class Pasajera implements OnInit, OnDestroy {
       next: (resultados) => {
         this.sugerenciasDestino = resultados;
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   seleccionarDestino(sugerencia: any) {
     // 1. Asignamos el nombre amigable en el input del formulario
     this.solicitudForm.patchValue({
-      destino: sugerencia.nombreCorto
+      destino: sugerencia.nombreCorto,
     });
 
     // 2. Guardamos las coordenadas para el backend si las necesitas
@@ -139,54 +147,66 @@ export class Pasajera implements OnInit, OnDestroy {
       origen: this.solicitudForm.value.origen,
       destino: this.solicitudForm.value.destino,
       // Podés mandar zona y pasajeros si tu backend los recibe
-      zona: this.solicitudForm.value.zona, 
-      cantPasajeros: this.solicitudForm.value.cantPasajeros
+      zona: this.solicitudForm.value.zona,
+      cantPasajeros: this.solicitudForm.value.cantPasajeros,
     };
 
     this.transaccionService.crearSolicitudViaje(datosInyeccion).subscribe({
       next: (res) => {
-        this.cargando = false;
-        // Simulamos la estructura inicial según tu HTML
-        this.solicitudActual = {
-          idSolicitud: res.idSolicitud,
-          origen: datosInyeccion.origen,
-          destino: datosInyeccion.destino,
-          zona: datosInyeccion.zona,
-          cantPasajeros: datosInyeccion.cantPasajeros,
-          estado: 'Pendiente' // Arranca pendiente de asignación
-        };
-        
-        Swal.fire('¡Pedido Registrado!', 'Buscando conductoras disponibles...', 'success');
-        this.comenzarMonitoreo();
+        this.ngZone.run(() => {
+          this.cargando = false;
+          this.solicitudActual = {
+            idSolicitud: res.idSolicitud,
+            origen: datosInyeccion.origen,
+            destino: datosInyeccion.destino,
+            zona: datosInyeccion.zona,
+            cantPasajeros: datosInyeccion.cantPasajeros,
+            estado: 'Pendiente',
+          };
+
+          this.cdr.detectChanges();
+          Swal.fire('¡Pedido Registrado!', 'Buscando conductoras disponibles...', 'success');
+          this.comenzarMonitoreo();
+        });
       },
       error: (err) => {
         this.cargando = false;
         Swal.fire('Error', 'No se pudo procesar la solicitud del viaje.', 'error');
-      }
+      },
     });
   }
 
   comenzarMonitoreo() {
     // Polling cada 4 segundos para actualizar la card del viaje automáticamente
-    this.miSubscripcion = interval(4000).pipe(
-      // Cambiá este método por el que use tu backend para traer una solicitud por ID
-      switchMap(() => this.transaccionService.listarSolicitudesPendientes()) 
-    ).subscribe({
-      next: (listaSolicitudes) => {
-        // Buscamos si nuestra solicitud cambió de estado en la base de datos
-        const miSolicitudServer = listaSolicitudes.find(s => s.idSolicitud === this.solicitudActual.idSolicitud);
-        
-        if (miSolicitudServer) {
-          // Actualiza 'Pendiente', 'Propuesta', 'Aceptada', 'Cancelada' o 'Rechazada'
-          this.solicitudActual.estado = miSolicitudServer.estado; 
-          
-          if (this.solicitudActual.estado === 'Aceptada') {
-            Swal.fire('¡Viaje Confirmado!', 'Tu conductora aceptó el viaje y va en camino.', 'success');
-          }
-        }
-      },
-      error: (err) => console.error('Error en sincronización', err)
-    });
+    this.miSubscripcion = interval(4000)
+      .pipe(
+        // Cambiá este método por el que use tu backend para traer una solicitud por ID
+        switchMap(() => this.transaccionService.listarSolicitudesPendientes()),
+      )
+      .subscribe({
+        next: (listaSolicitudes) => {
+          this.ngZone.run(() => {
+            const miSolicitudServer = listaSolicitudes.find(
+              (s) => s.idSolicitud === this.solicitudActual?.idSolicitud,
+            );
+
+            if (miSolicitudServer) {
+              this.solicitudActual.estado = miSolicitudServer.estado;
+
+              if (this.solicitudActual.estado === 'Aceptada') {
+                Swal.fire(
+                  '¡Viaje Confirmado!',
+                  'Tu conductora aceptó el viaje y va en camino.',
+                  'success',
+                );
+              }
+            }
+
+            this.cdr.detectChanges();
+          });
+        },
+        error: (err) => console.error('Error en sincronización', err),
+      });
   }
 
   cancelarSolicitud() {
@@ -197,18 +217,26 @@ export class Pasajera implements OnInit, OnDestroy {
       showCancelButton: true,
       confirmButtonColor: '#e11d48', // Color Pink/Rosa corporativo
       cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Sí, cancelar'
+      confirmButtonText: 'Sí, cancelar',
     }).then((result) => {
+      this.cdr.detectChanges();
+
       if (result.isConfirmed) {
-        this.transaccionService.cancelarSolicitud(this.solicitudActual.idSolicitud).subscribe({
-          next: () => {
-            Swal.fire('Cancelado', 'Tu solicitud fue dada de baja.', 'info');
-            this.detenerMonitoreo();
-            this.solicitudActual = null; // Volvemos a mostrar el formulario de pedido
-            this.solicitudForm.patchValue({ destino: '' }); // Reseteamos solo el destino anterior
-          },
-          error: (err) => Swal.fire('Error', 'No se pudo cancelar el viaje.', 'error')
-        });
+        this.transaccionService
+          .cancelarSolicitud(this.usuario.idUsuario, this.solicitudActual.idSolicitud)
+          .subscribe({
+            next: () => {
+              this.ngZone.run(() => {
+                this.detenerMonitoreo();
+                this.solicitudActual = null;
+                this.solicitudForm.patchValue({ destino: '' });
+
+                this.cdr.detectChanges();
+                Swal.fire('Cancelado', 'Tu solicitud fue dada de baja.', 'info');
+              });
+            },
+            error: (err) => Swal.fire('Error', 'No se pudo cancelar el viaje.', 'error'),
+          });
       }
     });
   }

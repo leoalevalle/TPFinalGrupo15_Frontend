@@ -237,34 +237,4 @@ export class Operadora implements OnInit {
       this.cdr.detectChanges();
     });
   }
-
-  // ================== VIAJES EN CURSO ==================
-  finalizarViaje(viaje: Viaje) {
-    Swal.fire({
-      icon: 'question',
-      title: '¿Finalizar viaje?',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, finalizar',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (!result.isConfirmed) return;
-
-      this.operadoraService.finalizarViaje(viaje.idViaje).subscribe({
-        next: (respuesta: any) => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Viaje finalizado',
-            text: `Monto cobrado: $${respuesta.viaje.monto}`,
-          });
-
-          this.viajesEnCurso = this.viajesEnCurso.filter((v) => v.idViaje !== viaje.idViaje);
-          this.guardarViajes();
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          Swal.fire('Error', err.error?.error || 'No se pudo finalizar el viaje.', 'error');
-        },
-      });
-    });
-  }
 }
