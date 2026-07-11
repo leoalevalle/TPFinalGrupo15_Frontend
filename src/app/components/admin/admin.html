@@ -251,6 +251,81 @@
   </div>
 </div>
 
+<div class="card shadow mt-5">
+  <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+    <h4 class="mb-0"><i class="fa-solid fa-car-side"></i> Gestión y Admisión de Pasajeras</h4>
+  </div>
+  <div class="card-body bg-light">
+    <div class="table-responsive">
+      <table class="table table-hover bg-white border rounded align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Nombre</th>
+            <th>Email / Teléfono</th>
+            <th>Género</th>
+            <th>Admisión de Viaje</th>
+            <th>Estado Cuenta</th>
+            <th class="text-center">Acciones de Control</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of listaPasajeras">
+            <td>
+              <span class="fw-bold">{{ p.nombre }}</span><br>
+              <small class="text-muted">&#64;{{ p.nomUsuario }}</small>
+            </td>
+            <td>
+              <i class="fa-solid fa-envelope text-muted me-1"></i> {{ p.email }}<br>
+              <i class="fa-solid fa-phone text-muted me-1"></i> {{ p.telefono }}
+            </td>
+            <td>
+              <span class="badge bg-secondary text-uppercase">{{ p.sexo }}</span>
+            </td>
+            
+            <!-- Estado de Admisión (aprobadaPorAdmin) -->
+            <td>
+              <span class="badge" [ngClass]="p.aprobadaPorAdmin ? 'bg-success' : 'bg-warning text-dark'">
+                {{ p.aprobadaPorAdmin ? 'Autorizada' : 'Pendiente Evaluación' }}
+              </span>
+            </td>
+
+            <!-- Estado Lógico de Cuenta (activo) -->
+            <td>
+              <span class="badge" [ngClass]="p.activo ? 'bg-info text-dark' : 'bg-danger'">
+                {{ p.activo ? 'Cuenta Activa' : 'Baneada / Suspendida' }}
+              </span>
+            </td>
+
+            <!-- Botonera Dinámica -->
+            <td class="text-center">
+              <div class="d-flex gap-2 justify-content-center">
+                <!-- Botones de Aprobación -->
+                <button *ngIf="!p.aprobadaPorAdmin" class="btn btn-sm btn-success" (click)="evaluarPasajera(p, true)" title="Aprobar Pasajera">
+                  <i class="fa-solid fa-check"></i> Autorizar
+                </button>
+                <button *ngIf="p.aprobadaPorAdmin" class="btn btn-sm btn-outline-warning text-dark" (click)="evaluarPasajera(p, false)" title="Revocar Autorización">
+                  <i class="fa-solid fa-xmark"></i> Revocar
+                </button>
+
+                <!-- Botones de Baneo General -->
+                <button *ngIf="p.activo" class="btn btn-sm btn-danger" (click)="alternarBaneoPasajera(p, false)" title="Banear Cuenta">
+                  <i class="fa-solid fa-ban"></i> Banear
+                </button>
+                <button *ngIf="!p.activo" class="btn btn-sm btn-outline-success" (click)="alternarBaneoPasajera(p, true)" title="Reactivar Cuenta">
+                  <i class="fa-solid fa-rotate-left"></i> Reactivar
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="listaPasajeras.length === 0">
+            <td colspan="6" class="text-center text-muted py-3">No hay pasajeras registradas en el sistema.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- 🚗 SECCIÓN: GESTIÓN DE CAMBIO DE VEHÍCULOS -->
 <div class="card shadow mt-5">
   <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">

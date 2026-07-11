@@ -14,10 +14,19 @@ export class AdministracionService {
   // =========================================================================
   // GESTIÓN DE USUARIOS / PASAJERAS / CONDUCTORAS
   // =========================================================================
+// 1. Obtener la lista de pasajeras
+  obtenerPasajeras(): Observable<any> {
+    return this.http.get<any>(`${this.api}/admin/pasajeras`);
+  }
 
-  // Ruta: PUT /api/usuarios/:id/estado
-  cambiarEstadoLogicoUsuario(idUsuario: number, activo: boolean): Observable<any> {
-    return this.http.put<any>(`${this.api}/usuarios/${idUsuario}/estado`, { activo });
+  // 2. Aprobar o rechazar admisión (Modifica 'aprobadaPorAdmin')
+  evaluarPasajera(id: number, aprobar: boolean): Observable<any> {
+    return this.http.put<any>(`${this.api}/admin/pasajeras/${id}/evaluar`, { aprobar });
+  }
+
+  // 3. Banear o activar cuenta (Modifica 'activo')
+  cambiarEstadoUsuario(id: number, activo: boolean): Observable<any> {
+    return this.http.put<any>(`${this.api}/admin/usuarios/${id}/estado`, { activo });
   }
 
   // Ruta: PUT /api/pasajeras/:id/evaluar
