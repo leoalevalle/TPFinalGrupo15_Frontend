@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Vehiculo } from '../models/vehiculo'; 
 
@@ -89,10 +89,35 @@ export class ConductoraService {
   }
 
   confirmarPagoEfectivo(idViaje: number): Observable<any> {
-    return this.http.put<any>(`${this.api}/transaccion/viajes/${idViaje}/confirmar-pago-efectivo`, {});
+    const token = localStorage.getItem('token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.put<any>(`${this.api}/transaccion/viajes/confirmar-efectivo`, { idViaje }, { headers });
   }
 
-  confirmarPagoMercadoPago(idViaje: number): Observable<any> {
-    return this.http.post<any>(`${this.api}/transaccion/viajes/${idViaje}/crear-preferencia-mp`, {});
+  confirmarPagoMercadoPago(idViaje: number, monto: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.post<any>(`${this.api}/transaccion/viajes/${idViaje}/crear-preferencia-mp`, { monto }, { headers });
   }
+
+  obtenerDetalleViajeCompleto(idViaje: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.api}/transaccion/viajes/${idViaje}/detalle-completo`
+    );
+  }
+  
+  registrarPagoMercadoPago(idViaje: number, paymentId: string) {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    });
+    return this.http.put(
+      `${this.api}/transaccion/viajes/confirmar-mercadopago`,
+      {
+        idViaje,
+        paymentId
+      },
+      { headers }
+    );
+  }
+  
 }

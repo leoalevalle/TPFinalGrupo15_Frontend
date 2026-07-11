@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { ConductoraService } from '../../services/conductora.service';
 import { MapaService } from '../../services/mapa.service';
 import { GeocodingService } from '../../services/geocoding.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-conductora',
@@ -23,6 +24,9 @@ export class Conductora implements OnInit, OnDestroy {
   resumenDiario: any = null;
   pestanaActiva: string = 'vehiculo';
   monto: any = null;
+  detalleViaje: any = null;
+  isProcesandoPago: boolean = false;
+
   private refreshInterval: any;
   private mapaInicializado: boolean = false;
   private idViajeDibujado: string | null = null;
@@ -63,8 +67,13 @@ export class Conductora implements OnInit, OnDestroy {
   }
 
   consultarPanelEnVivo() {
+    if (this.isProcesandoPago) {
+      console.log("Sincronización pausada: Conductora procesando el pago en pantalla.");
+      return; 
+    }
+
     if (this.viajeActivo && this.viajeActivo.estadoViaje === 'Cancelado en Ruta') {
-    return; 
+      return; 
     }
     this.conductoraService.obtenerViajeActivo().subscribe({
       next: (viaje) => {
@@ -85,6 +94,7 @@ export class Conductora implements OnInit, OnDestroy {
                 console.log("Manteniendo cartel de 'Esperando despacho' en el frontend");
               } else {
                 this.propuesta = null;
+                this.detalleViaje=this.obtenerDetalleViajeCompleto(this.viajeActivo.idViaje);
               }
               this.cdr.detectChanges();
             },
@@ -103,65 +113,59 @@ export class Conductora implements OnInit, OnDestroy {
   }
 
   private procesarMapaParaViaje(datosViaje: any) {
-  // 1. Identificamos de manera única este viaje/propuesta
-  const idActual = datosViaje.idViaje || datosViaje.idSolicitud || datosViaje.origen + datosViaje.destino;
-  const tipoActual = datosViaje.estadoViaje ? 'activo' : 'propuesta';
+    const idActual = datosViaje.idViaje || datosViaje.idSolicitud || datosViaje.origen + datosViaje.destino;
+    const tipoActual = datosViaje.estadoViaje ? 'activo' : 'propuesta';
 
-  // 2. CONTROL CLAVE: Si ya estamos mostrando este mismo mapa, NO HACEMOS NADA.
-  // Esto evita que el bucle de 5 segundos destruya el mapa continuamente.
-  if (this.mapaInicializado && this.idViajeDibujado === idActual && this.tipoServicioDibujado === tipoActual) {
-    return; 
-  }
+    if (this.mapaInicializado && this.idViajeDibujado === idActual && this.tipoServicioDibujado === tipoActual) {
+      return; 
+    }
 
-  // Guardamos el registro de lo que vamos a dibujar ahora
-  this.idViajeDibujado = idActual;
-  this.tipoServicioDibujado = tipoActual;
-  this.mapaInicializado = true;
+    this.idViajeDibujado = idActual;
+    this.tipoServicioDibujado = tipoActual;
+    this.mapaInicializado = true;
 
-  // Caso A: El backend ya provee las coordenadas directamente
-  if (datosViaje.lonOrigen && datosViaje.latOrigen && datosViaje.lonDestino && datosViaje.latDestino) {
-    setTimeout(() => {
-      this.inicializarYFijarRuta(
-        datosViaje.lonOrigen, datosViaje.latOrigen, 
-        datosViaje.lonDestino, datosViaje.latDestino
-      );
-    }, 100);
-    return;
-  }
+    if (datosViaje.lonOrigen && datosViaje.latOrigen && datosViaje.lonDestino && datosViaje.latDestino) {
+      setTimeout(() => {
+        this.inicializarYFijarRuta(
+          datosViaje.lonOrigen, datosViaje.latOrigen, 
+          datosViaje.lonDestino, datosViaje.latDestino
+        );
+      }, 100);
+      return;
+    }
 
-  // Caso B: El backend solo envió texto. ¡Buscamos las coordenadas en vivo!
-  if (datosViaje.origen && datosViaje.destino) {
-    const latJujuy = -24.185;
-    const lonJujuy = -65.299;
-    const textoOrigenSeguro = `${datosViaje.origen}, Jujuy, Argentina`;
-    const textoDestinoSeguro = `${datosViaje.destino}, Jujuy, Argentina`;
+    if (datosViaje.origen && datosViaje.destino) {
+      const latJujuy = -24.185;
+      const lonJujuy = -65.299;
+      const textoOrigenSeguro = `${datosViaje.origen}, Jujuy, Argentina`;
+      const textoDestinoSeguro = `${datosViaje.destino}, Jujuy, Argentina`;
 
-    this.geocodingService.buscarSugerencias(textoOrigenSeguro, latJujuy, lonJujuy).subscribe(origenRes => {
-      if (origenRes && origenRes.length > 0) {
-        const puntoOrigen = origenRes[0];
+      this.geocodingService.buscarSugerencias(textoOrigenSeguro, latJujuy, lonJujuy).subscribe(origenRes => {
+        if (origenRes && origenRes.length > 0) {
+          const puntoOrigen = origenRes[0];
 
-        this.geocodingService.buscarSugerencias(datosViaje.destino, latJujuy, lonJujuy).subscribe(destinoRes => {
-          if (destinoRes && destinoRes.length > 0) {
-            const puntoDestino = destinoRes[0];
+          this.geocodingService.buscarSugerencias(datosViaje.destino, latJujuy, lonJujuy).subscribe(destinoRes => {
+            if (destinoRes && destinoRes.length > 0) {
+              const puntoDestino = destinoRes[0];
 
-            setTimeout(() => {
-              this.inicializarYFijarRuta(
-                puntoOrigen.lon, puntoOrigen.lat,
-                puntoDestino.lon, puntoDestino.lat
-              );
-            }, 100);
-          }
-        });
-      }
-    });
-  }
+              setTimeout(() => {
+                this.inicializarYFijarRuta(
+                  puntoOrigen.lon, puntoOrigen.lat,
+                  puntoDestino.lon, puntoDestino.lat
+                );
+              }, 100);
+            }
+          });
+        }
+      });
+    }
   }
 
   private inicializarYFijarRuta(lonO: number, latO: number, lonD: number, latD: number) {
-  this.mapaService.inicializarMapa('mapa-conductora', lonO, latO, 13);
-  this.mapaService.fijarMarcadorOrigen(lonO, latO);
-  this.mapaService.fijarMarcadorDestino(lonD, latD);
-  this.mapaService.trazarRuta(lonO, latO, lonD, latD);
+    this.mapaService.inicializarMapa('mapa-conductora', lonO, latO, 13);
+    this.mapaService.fijarMarcadorOrigen(lonO, latO);
+    this.mapaService.fijarMarcadorDestino(lonD, latD);
+    this.mapaService.trazarRuta(lonO, latO, lonD, latD);
   }
 
   responder(aceptar: boolean) {
@@ -211,19 +215,171 @@ export class Conductora implements OnInit, OnDestroy {
 
   finalizarViaje() {
     if (!this.viajeActivo) return;
+    
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+
     this.conductoraService.finalizarViaje(this.viajeActivo.idViaje).subscribe({
       next: (res) => {
         this.monto = res.viaje.monto;
-        this.viajeActivo = null;
-        this.propuesta = null;
+        const idViaje = res.viaje.idViaje;
+
+        this.isProcesandoPago = true; // 🔥 Bloqueamos la interfaz desde acá
+        this.mostrarMenuPago(idViaje);
+      },
+      error: (err) => {
+        Swal.fire('Error', err.error?.error || 'No se pudo finalizar el servicio', 'error');
+        this.reanudarIntervalo();
+      }
+    });
+  }
+
+  private mostrarMenuPago(idViaje: number) {
+    Swal.fire({
+      title: `Servicio Finalizado: $${this.monto}`,
+      text: 'Seleccione el método con el que abonará la pasajera:',
+      icon: 'info',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Efectivo',
+      denyButtonText: 'Mercado Pago',
+      cancelButtonText: 'Volver',
+      confirmButtonColor: '#28a745',
+      denyButtonColor: '#009ee3',
+      allowOutsideClick: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.conductoraService.confirmarPagoEfectivo(idViaje).subscribe({
+          next: () => {
+            Swal.fire('¡Éxito!', 'Pago en efectivo registrado.', 'success');
+            this.isProcesandoPago = false; // 🔥 Liberamos la interfaz: el pago fue exitoso
+            this.limpiarPantallaViaje();
+            this.reanudarIntervalo();
+          },
+          error: (err) => {
+            Swal.fire('Error', err.error?.error || 'No se pudo registrar el pago', 'error');
+            this.reanudarIntervalo(); // Mantiene isProcesandoPago en true para que reintente
+          }
+        });
+      }
+      else if (result.isDenied) {
+        this.pagarMercadoPago(idViaje);
+      }
+      else {
+        // Si toca "Volver", cancela el flujo y liberamos el bloqueo
+        this.isProcesandoPago = false; 
+        this.reanudarIntervalo();
+      }
+    });
+  }
+
+  private pagarMercadoPago(idViaje: number) {
+    Swal.fire({
+      title: 'Generando link...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    this.conductoraService.confirmarPagoMercadoPago(idViaje, this.monto).subscribe({
+      next: (mpRes) => {
+        Swal.close();
+        if (!mpRes.sandbox_init_point) {
+          Swal.fire('Error', 'No se pudo generar el enlace de pago.', 'error');
+          this.mostrarMenuPago(idViaje);
+          return;
+        }
+
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(mpRes.sandbox_init_point)}`;
         
-        this.zone.run(() => {
-          this.obtenerGananciasDelDia();
-          this.cdr.markForCheck();
-          this.cdr.detectChanges();
+        Swal.fire({
+          title: 'Cobrar con Mercado Pago',
+          html: `
+            <img src="${qrUrl}" style="max-width:220px;margin-bottom:15px;">
+            <p>Monto: <h3>$${this.monto}</h3></p>
+            <p>Escanee el QR o presione <b>Abrir Pasarela</b>.</p>
+            <small>Verificá el comprobante antes de confirmar.</small>
+          `,
+          confirmButtonText: 'Abrir Pasarela',
+          showDenyButton: true,
+          denyButtonText: 'Ya pagó (Confirmar)', // El botón que esperabas presionar tranquilo
+          showCancelButton: true,
+          cancelButtonText: 'Cambiar método',
+          allowOutsideClick: false,
+          preConfirm: () => {
+            window.open(mpRes.sandbox_init_point, '_blank');
+            return false; // Evita que "Abrir Pasarela" cierre el cartel
+          }
+        }).then((resultado) => {
+          if (resultado.isDenied) {
+            // CUANDO LA CONDUCTORA CONFIRMA MANUALMENTE EL COMPROBANTE
+            const paymentIdSimulado = `MP-SIM-${Date.now()}`;
+            this.conductoraService.registrarPagoMercadoPago(idViaje, paymentIdSimulado).subscribe({
+              next: () => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Pago registrado',
+                  text: 'Pago de Mercado Pago registrado correctamente.'
+                });
+                this.isProcesandoPago = false; // 🔥 Liberamos la UI tras impactar en la BD
+                this.limpiarPantallaViaje();
+                this.reanudarIntervalo();
+              },
+              error: (err) => {
+                Swal.fire('Error', err.error?.error || 'No se pudo registrar el pago.', 'error');
+              }
+            });
+          }
+          else if (resultado.dismiss === Swal.DismissReason.cancel) {
+            this.mostrarMenuPago(idViaje); // Vuelve al menú anterior, mantiene bloqueado
+          }
+          else {
+            this.isProcesandoPago = false;
+            this.reanudarIntervalo();
+          }
         });
       },
-      error: (err) => alert(err.error.error)
+      error: () => {
+        Swal.fire('Error', 'No se pudo generar el QR de Mercado Pago.', 'error');
+        this.mostrarMenuPago(idViaje);
+      }
+    });
+  }
+
+  private reanudarIntervalo() {
+    if (this.refreshInterval) clearInterval(this.refreshInterval);
+    this.refreshInterval = setInterval(() => {
+      this.zone.run(() => {
+        this.consultarPanelEnVivo();
+      });
+    }, 10000);
+  }
+
+  private limpiarPantallaViaje() {
+    this.viajeActivo = null;
+    this.propuesta = null;
+    this.detalleViaje = null;
+    this.monto = 0;
+    this.mapaInicializado = false;
+    this.idViajeDibujado = null;
+    this.tipoServicioDibujado = null;
+    if (this.mapaService) this.mapaService.destruirMapa();
+    
+    this.zone.run(() => {
+      this.obtenerGananciasDelDia();
+      this.cdr.detectChanges();
+    });
+  }
+
+  obtenerDetalleViajeCompleto(idViaje: number): void {
+    this.conductoraService.obtenerDetalleViajeCompleto(idViaje).subscribe({
+      next: (detalle) => {
+        console.log("Detalle del viaje:", detalle);
+        this.detalleViaje = detalle;
+      },
+      error: (err) => {
+        console.error("Error al obtener detalle del viaje", err);
+      }
     });
   }
 
@@ -256,6 +412,7 @@ export class Conductora implements OnInit, OnDestroy {
   refrescar(){
     this.viajeActivo = null; 
     this.propuesta = null;
+    this.detalleViaje = null;
     this.mapaInicializado = false;
     this.idViajeDibujado = null;
     this.tipoServicioDibujado = null;
